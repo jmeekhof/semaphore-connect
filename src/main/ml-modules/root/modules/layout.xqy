@@ -62,7 +62,7 @@ declare function l:header() as element()* {
 declare function l:footer() as element()* {
   <footer class="footer bg-white text-right">
     <p>
-      <img style="height: 20px" src="resources/images/ml-logo.gif"/>
+      <img style="height: 20px" src="/resources/images/ml-logo.gif"/>
     </p>
     <br/>
     <p style="font-size:75%;">Semaphore Connector v<!-- version here, eventually --></p>
