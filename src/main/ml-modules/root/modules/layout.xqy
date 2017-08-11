@@ -46,6 +46,16 @@ declare function l:header() as element()* {
         <img class="m-t" alt="Smartlogic" width="80px" src="/resources/images/smartlogic-logo.png"/>
       </a>
     </div>
+  </header>,
+  <header class="bg-white">
+    <div class="row b-b m-l-none m-r-none">
+      <div class="col-lg-12">
+        <h3 class="m-t m-b-none">
+          <p class="block">Semaphore Connector</p>
+        </h3>
+        <p class="block">Home</p>
+      </div>
+    </div>
   </header>
 };
 

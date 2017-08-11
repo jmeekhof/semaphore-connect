@@ -10,16 +10,6 @@ let $title := xdmp:database-name(xdmp:database())
 let $content := (
     <section class="animated fadeIn w-f">
       <section class="hbox stretch">
-        <header class="bg-white">
-          <div class="row b-b m-l-none m-r-none">
-            <div class="col-lg-12">
-              <h3 class="m-t m-b-none">
-                <p class="block">Semaphore Connector</p>
-              </h3>
-              <p class="block">Home</p>
-            </div>
-          </div>
-        </header>
         <div class="wrapper">
           <div class="row">
             <div class="col-md-3">
