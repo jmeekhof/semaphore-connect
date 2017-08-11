@@ -1,0 +1,5 @@
+{
+  "user-name" : "semaphore-connect-reader",
+  "password" : "semaphore-connect-reader",
+  "role" : [ "semaphore-connect-reader" ]
+}

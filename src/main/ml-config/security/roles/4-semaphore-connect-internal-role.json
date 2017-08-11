@@ -1,0 +1,5 @@
+{
+  "role-name" : "semaphore-connect-internal",
+  "description" : "Internal role used for amping",
+  "role" : [ "semaphore-connect-writer" ]
+}

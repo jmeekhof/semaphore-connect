@@ -1,0 +1,5 @@
+{
+  "user-name" : "semaphore-connect-admin",
+  "password" : "semaphore-connect-admin",
+  "role" : [ "semaphore-connect-admin" ]
+}
