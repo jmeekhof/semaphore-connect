@@ -6,24 +6,8 @@ declare option xdmp:mapping "false";
 declare option xdmp:output "method=html";
 
 let $title := xdmp:database-name(xdmp:database())
-let $headers := (
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>,
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"/>,
-  <link rel="stylesheet" href="/resources/css/app.css" />,
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"/>,
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"/>
-)
 
 let $content := (
-<div>
-  <section xmlns="" class="vbox">
-    <header id="nav-bar-main" class="header bg-primary nav-bar">
-      <div class="navbar-header">
-        <a class="navbar-brand animated pulse no-padder m-r" href="/">
-          <img class="m-t" alt="Smartlogic" width="80px" src="/resources/images/smartlogic-logo.png"/>
-        </a>
-      </div>
-    </header>
     <section class="animated fadeIn w-f">
       <section class="hbox stretch">
         <header class="bg-white">
@@ -44,9 +28,7 @@ let $content := (
                   <h4 class="m-t-xs m-b-xs text-center">Connectors</h4>
                 </div>
                 <div class="panel-body text-center">
-                  <form action="/connections/main.html" method="POST" enctype="multipart/form-data">
-                    <input formaction="/connections/addDefault.html" type="submit" value="Add Connection" name="myAction2" id="myAction2" data-toggle="tooltip" data-placement="top" title="Add a default connection" class="btn m-b-xs btn-success"/>
-                  </form>
+                  <a href="/connection/add.xqy" class="btn m-b-xs btn-success">Add Connection</a>
                 </div>
                 <form class="form m-b-none" action="/connections/update.html" method="POST" enctype="multipart/form-data">
                   <table class="table table-hover m-b-none">
@@ -81,21 +63,8 @@ let $content := (
           </div>
         </div>
       </section>
-      <footer class="footer bg-white text-right">
-        <p>
-          <img style="height: 20px" src="resources/images/ml-logo.gif"/>
-        </p>
-        <br/>
-        <p style="font-size:75%;">Semaphore Connector v<!-- version here, eventually --></p>
-      </footer>
     </section>
-  </section>
-</div>
 )
 
 return
-l:assemble-page(
-	$title,
-	$content,
-	$headers
-)
+  l:assemble-page-default( $title, $content)
