@@ -3,36 +3,41 @@ xquery version '1.0-ml';
 module namespace c = 'pipeline:connection';
 import module namespace functx = "http://www.functx.com" at "/MarkLogic/functx/functx-1.0-nodoc-2007-01.xqy";
 
+declare namespace s = "smartlogic:classification:settings";
+
 declare option xdmp:mapping 'false';
 
-declare function c:new-connection-form() {
+declare function c:init-form-vars() as map:map {
   (:~ Initialize form vars with some reasonable defaults
    :
    :)
-  let $form := map:new( (
-    map:entry('connection-name', 'Default_SCS-1'),
-    map:entry('classification-server-url', 'http://localhost:5058'),
-    map:entry('classification-description', ''),
-    map:entry('article-type', 'SA'),
-    map:entry('root-element', '.'),
-    map:entry('response-element', 'meta'),
-    map:entry('response-namespace', 'urn:namespace:here'),
-    map:entry('classification-timeout', 300),
-    map:entry('title','title/text()'),
-    map:entry('body', '/'),
-    map:entry('body-type', 'HTML'),
-    map:entry('clustering-type', 'default'),
-    map:entry('clustering-threshold',20),
-    map:entry('threshold', 48),
-    map:entry('Language', '')
+  map:new( (
+    map:entry('connection-name', xdmp:get-request-field('connection-name' ,'Default_SCS-1')),
+    map:entry('classification-server-url', xdmp:get-request-field('classification-server-url' ,'http://localhost:5058')),
+    map:entry('classification-description', xdmp:get-request-field( 'classification-description','')),
+    map:entry('article-type', xdmp:get-request-field('article-type' ,'SA')),
+    map:entry('root-element', xdmp:get-request-field( 'root-element','.')),
+    map:entry('response-element', xdmp:get-request-field( 'response-element','meta')),
+    map:entry('response-namespace', xdmp:get-request-field('response-namespace' ,'urn:namespace:here')),
+    map:entry('classification-timeout', xdmp:get-request-field( 'classification-timeout' ,'300')),
+    map:entry('title',xdmp:get-request-field( 'title' ,'title/text()')),
+    map:entry('body', xdmp:get-request-field('body' ,'/')),
+    map:entry('body-type', xdmp:get-request-field('body-type' ,'HTML')),
+    map:entry('clustering-type', xdmp:get-request-field( 'clustering-type' ,'default')),
+    map:entry('clustering-threshold',xdmp:get-request-field('clustering-threshold' ,'20')),
+    map:entry('threshold', xdmp:get-request-field('threshold' ,'48')),
+    map:entry('language', xdmp:get-request-field( 'language' ,'')),
+    map:entry('rulebases', (xdmp:get-request-field('rulebase')) )
   ) )
+};
 
-  return c:connection-form($form)
+declare function c:new-connection-form() {
+  c:connection-form(c:init-form-vars())
 };
 
 declare function
 c:connection-form($defaults as map:map) as element()* {
-  <form class="form" action="/connections/replace.html" method="POST" enctype="multipart/form-data" onsubmit="x = document.getElementById('myTable').rows.length; document.getElementById('filterCount').value = x; var xslt = document.getElementById('xslt').value; document.getElementById('filenameXSL').value = xslt; var checked = document.getElementById('toggleForm').checked; document.getElementById('useXSL').value = checked;  var checked = document.getElementById('UGK').checked; document.getElementById('useGK').value = checked">
+  <form class="form" action="/connection/save.xqy" method="POST" enctype="multipart/form-data" onsubmit="x = document.getElementById('myTable').rows.length; document.getElementById('filterCount').value = x; var xslt = document.getElementById('xslt').value; document.getElementById('filenameXSL').value = xslt; var checked = document.getElementById('toggleForm').checked; document.getElementById('useXSL').value = checked;  var checked = document.getElementById('UGK').checked; document.getElementById('useGK').value = checked">
     <input type="hidden" name="myuri" value="/pipelines/2558146824718105252.xml"/>
     <input type="hidden" name="filterCount" id="filterCount"/>
     <input type="hidden" id="filenameXSL" name="filenameXSL" value="DefaultXSL.xsl"/>
@@ -191,8 +196,8 @@ c:connection-form($defaults as map:map) as element()* {
         <tbody/>
       </table>
       <div class="panel-footer">
-        <input type="button" class="btn btn-sm btn-primary m-r-xs" onclick="myCreateFunction()" value="Add Rulebase"/>
-        <input class="btn btn-sm btn-danger" type="button" onclick="myDeleteFunction()" value="Delete Rulebase"/>
+        <input type="button" class="btn btn-sm btn-primary m-r-xs" onclick="createRuleBase()" value="Add Rulebase"/>
+        <input class="btn btn-sm btn-danger" type="button" onclick="deleteRuleBase()" value="Delete Rulebase"/>
       </div>
     </div>
     <div class="text-center m-t-lg m-b-lg">
