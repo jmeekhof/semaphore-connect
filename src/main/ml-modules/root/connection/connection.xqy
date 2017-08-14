@@ -75,21 +75,33 @@ c:connection-form($defaults as map:map) as element()* {
           </td>
           <td>
           {
-          let $e := <input type="radio" name="article-type" id="article-sa" value="SA"/>
-          return
-            if (map:get($defaults, 'article-type') = 'SA') then
-              functx:add-attributes($e, (xs:QName('checked')), ('checked'))
-            else
-              $e
+          element input {
+            attribute type { "radio"},
+            attribute name { "article-type"},
+            attribute id { "article-sa" },
+            (
+              if ( map:get( $defaults, 'article-type') = 'SA' ) then
+                attribute checked { "checked" }
+              else
+                ()
+            ),
+            attribute value {"SA"}
+          }
           }
             &nbsp;<label for="article-sa">Single</label> /
           {
-          let $e := <input type="radio" name="article-type" id="article-ma" value="MA"/>
-          return
-            if (map:get($defaults, 'article-type') = 'MA') then
-              functx:add-attributes($e, (xs:QName('checked')), ('checked'))
-            else
-              $e
+          element input {
+            attribute type { "radio"},
+            attribute name { "article-type"},
+            attribute id { "article-ma" },
+            (
+              if ( map:get( $defaults, 'article-type') = 'MA' ) then
+                attribute checked { "checked" }
+              else
+                ()
+            ),
+            attribute value {"MA"}
+          }
           }
             &nbsp;<label for="article-ma">Multiple</label>
           </td>
