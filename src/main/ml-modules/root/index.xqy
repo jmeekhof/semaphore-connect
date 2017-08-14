@@ -2,9 +2,10 @@ xquery version '1.0-ml';
 
 import module namespace l = 'pipeline:layout:html' at '/modules/layout.xqy';
 import module namespace c = 'pipeline:connection' at '/connection/connection.xqy';
+declare namespace html = "http://www.w3.org/1999/xhtml";
 
 declare option xdmp:mapping "false";
-declare option xdmp:output "method=html";
+declare option xdmp:output "method=xhtml";
 
 let $title := xdmp:database-name(xdmp:database())
 
@@ -21,7 +22,7 @@ let $content := (
                   <h4 class="m-t-xs m-b-xs text-center">Connectors</h4>
                 </div>
                 <div class="panel-body text-center">
-                  <a href="/connection/add.xqy" class="btn m-b-xs btn-success">Add Connection</a>
+                  <a href="/connection/edit.xqy" class="btn m-b-xs btn-success">Add Connection</a>
                 </div>
                 <form class="form m-b-none" action="/connections/update.html" method="POST" enctype="multipart/form-data">
                   <table class="table table-hover m-b-none">
@@ -36,12 +37,12 @@ let $content := (
                           attribute class {'text-right'},
                           element a {
                             attribute class {"btn btn-sm btn-primary"},
-                            attribute href { "/connection/edit.xqy?"||map:get(.,'uri') },
+                            attribute href { "/connection/edit.xqy?uri="||map:get(.,'uri') },
                             "Edit"
                           },
                           element a {
                             attribute class {"btn btn-sm btn-danger"},
-                            attribute href { "/connection/delete.xqy?"||map:get(.,'uri')},
+                            attribute href { "/connection/delete.xqy?uri="||map:get(.,'uri')},
                             "Delete"
                           }
                         }

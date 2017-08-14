@@ -4,6 +4,7 @@ module namespace l = 'pipeline:layout:html';
 
 declare namespace html = "http://www.w3.org/1999/xhtml";
 
+declare default element namespace "http://www.w3.org/1999/xhtml";
 declare option xdmp:mapping "false";
 
 declare function l:assemble-page($title as xs:string, $content as element()*) as node()* {
@@ -12,7 +13,8 @@ declare function l:assemble-page($title as xs:string, $content as element()*) as
 
 declare function l:assemble-page($title as xs:string, $content as element()*, $head-link as element()*) as node()* {
   xdmp:set-response-content-type("text/html"),
-  <html>
+  document {
+  <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>{$title}</title>
         {$head-link}
@@ -23,6 +25,7 @@ declare function l:assemble-page($title as xs:string, $content as element()*, $h
       </div>
     </body>
   </html>
+  }
 };
 
 declare function l:assemble-page-default($title as xs:string, $content as element()*) as node()* {
@@ -31,12 +34,12 @@ declare function l:assemble-page-default($title as xs:string, $content as elemen
 
 declare function l:head() as element()* {
   (
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>,
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"/>,
-    <link rel="stylesheet" href="/resources/css/app.css" />,
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"/>,
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"/>,
-    <script src="/resources/js/app.js" />
+    <html:link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>,
+    <html:link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"/>,
+    <html:link rel="stylesheet" href="/resources/css/app.css" />,
+    <html:script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"/>,
+    <html:script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"/>,
+    <html:script src="/resources/js/app.js" />
   )
 };
 

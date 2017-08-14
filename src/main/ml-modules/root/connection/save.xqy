@@ -7,7 +7,13 @@ declare option xdmp:mapping "false";
 let $headers := eput:get-request-headers()
 let $method := eput:get-request-method($headers)
 
-let $form-post := c:init-form-vars()
-let $doc-uri := c:save-configuration($form-post)
+(:determine if this is new or updated :)
+let $uri := xdmp:get-request-field("uri")
 return
-  $doc-uri
+if (fn:exists($uri) ) then
+  () (:update logichandler:)
+else
+  let $form-post := c:init-form-vars()
+  let $doc-uri := c:save-configuration($form-post)
+  return
+    $doc-uri
