@@ -2,6 +2,7 @@ xquery version '1.0-ml';
 
 import module namespace l = 'pipeline:layout:html' at '/modules/layout.xqy';
 import module namespace c = 'pipeline:connection' at '/connection/connection.xqy';
+import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
 declare namespace html = "http://www.w3.org/1999/xhtml";
 
 declare option xdmp:mapping "false";
@@ -68,6 +69,76 @@ let $content := (
                   </thead>
                   <tbody>
                     <!-- list connector status here -->
+                    {
+                    $connectors !
+                    element tr {
+                      element td { map:get(.,'connection-name') },
+                      element td { map:get(.,'classification-description') },
+                      element td {
+                        if (map:contains(.,'domains')) then
+                          (
+                          let $d := map:get(.,'domains')
+                          return
+                            (
+                              attribute class {'text-success font-bold'},
+                              element input {
+                                attribute type {"hidden"},
+                                attribute name {map:get(.,'connection-name')},
+                                attribute values { 1 }
+                              },
+                              $d/dom:domain-name !  element p { ./text() }
+                            )
+                          )
+                        else
+                          (
+                           attribute class {'text-danger font-bold'},
+                           element input {
+                             attribute type {"hidden"},
+                             attribute name {map:get(.,'connection-name')},
+                             attribute values { 0 }
+                           },
+                           'Ready To Deploy'
+                          )
+                      },
+                      (:
+                       : <a
+                       : class="btn btn-sm btn-success"
+                       : data-toggle="modal"
+                       : href="#deploy"
+                       : onClick="document.getElementById('fdeploy').action = '/deploy/dodeploy.html?myuri={fn:string($r//*[fn:local-name()="u"])}';document.getElementById('dLabel').innerHTML = '&lt;p&gt;Please select the Database and Domain where pipeline &lt;strong&gt;{fn:string($r//*[fn:local-name()='pipeline-name'])}&lt;/strong&gt; will be deployed.&lt;/p&gt;'">Deploy</a>
+                       :)
+                      element td {
+                        element a {
+                          attribute class {"btn btn-sm btn-success"},
+                          attribute data-toggle {"modal" },
+                          attribute href {"#deploy"},
+                          "Deploy"
+                        }
+                      },(:deploy:)
+                      (:<a class="btn btn-sm btn-default" data-toggle="modal"
+                       : href="#undeploy"
+                       : onClick="document.getElementById('fundeploy').action
+                       : =
+                       : '/undeploy/doundeploy.html?myuri={fn:string($r//*[fn:local-name()="u"])}';document.getElementById('PNAME').value
+                       : =
+                       : '{fn:string($r//*[fn:local-name()='pipeline-name'])}';document.getElementById('udomlist').innerHTML
+                       : = '{$options_str}';
+                       : document.getElementById('PID').value =
+                       : '{fn:string($id)}';document.getElementById('uLabel').innerHTML
+                       : = '&lt;p&gt;Pipeline
+                       : &lt;strong&gt;{fn:string($r//*[fn:local-name()='pipeline-name'])}&lt;/strong&gt;
+                       : with ID {$id} is currently deployed in the following
+                       : domains:&lt;/p&gt;'">Undeploy</a>:)
+                      element td {
+                        element a {
+                          attribute class {"btn btn-sm btn-default"},
+                          attribute data-toggle {"modal"},
+                          attribute href {"#undeploy"},
+                          "Undeploy"
+                        }
+                      } (:undeploy:)
+                    }
+                    }
                   </tbody>
                 </table>
               </div>
