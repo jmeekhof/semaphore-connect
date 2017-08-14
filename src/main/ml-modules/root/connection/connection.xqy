@@ -5,7 +5,7 @@ import module namespace functx = "http://www.functx.com" at "/MarkLogic/functx/f
 
 declare namespace s = "smartlogic:classification:settings";
 
-declare variable $c:collection-names as xs:string := ('classification-rules');
+declare variable $c:collection-name as xs:string := 'classification-rules';
 
 declare option xdmp:mapping 'false';
 
@@ -252,9 +252,17 @@ declare function c:save-configuration($form-post as map:map) as xs:string {
       }
     </s:classification-settings>
   let $uri := "/classification-settings/" || sem:uuid-string() || ".xml"
-  let $_ :=  xdmp:document-insert($uri, $doc, (),($c:classification-rules))
+  let $_ :=  xdmp:document-insert($uri, $doc, (),($c:collection-name))
   return $uri
 };
 
-declare function c:list-configurations() as map:map {
+declare function c:list-configurations() as map:map* {
+
+  cts:search(fn:collection($c:collection-name),
+    cts:element-query(xs:QName("s:connection-name"), cts:true-query()))
+    !
+    map:new((
+      map:entry('connection-name', ./s:classification-settings/s:connection-name/text() ),
+      map:entry('uri', xdmp:node-uri(.))
+    ))
 };

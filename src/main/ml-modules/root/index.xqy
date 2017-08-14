@@ -1,11 +1,14 @@
 xquery version '1.0-ml';
 
 import module namespace l = 'pipeline:layout:html' at '/modules/layout.xqy';
+import module namespace c = 'pipeline:connection' at '/connection/connection.xqy';
 
 declare option xdmp:mapping "false";
 declare option xdmp:output "method=html";
 
 let $title := xdmp:database-name(xdmp:database())
+
+let $connectors := c:list-configurations()
 
 let $content := (
     <section class="animated fadeIn w-f">
@@ -24,6 +27,26 @@ let $content := (
                   <table class="table table-hover m-b-none">
                     <tbody>
                       <!-- list existing connectors here -->
+                      {
+                      $connectors !
+                      element tr {
+                        element td { map:get(.,'connection-name')},
+                        element td {
+                          attribute width { '150px'},
+                          attribute class {'text-right'},
+                          element a {
+                            attribute class {"btn btn-sm btn-primary"},
+                            attribute href { "/connection/edit.xqy?"||map:get(.,'uri') },
+                            "Edit"
+                          },
+                          element a {
+                            attribute class {"btn btn-sm btn-danger"},
+                            attribute href { "/connection/delete.xqy?"||map:get(.,'uri')},
+                            "Delete"
+                          }
+                        }
+                      }
+                      }
                     </tbody>
                   </table>
                 </form>
