@@ -298,3 +298,6 @@ declare function c:list-configurations() as map:map* {
     ))
 };
 
+declare function c:delete-connection($uri as xs:string) as empty-sequence() {
+  xdmp:document-delete($uri)
+};
