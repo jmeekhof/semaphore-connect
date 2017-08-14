@@ -5,6 +5,8 @@ import module namespace functx = "http://www.functx.com" at "/MarkLogic/functx/f
 
 declare namespace s = "smartlogic:classification:settings";
 
+declare variable $c:collection-names as xs:string := ('classification-rules');
+
 declare option xdmp:mapping 'false';
 
 declare function c:init-form-vars() as map:map {
@@ -218,4 +220,41 @@ c:connection-form($defaults as map:map) as element()* {
     </div>
   </form>
 
+};
+
+declare function c:save-configuration($form-post as map:map) as xs:string {
+  let $doc :=
+    <s:classification-settings>
+      <s:connection-name>{map:get($form-post, 'connection-name')}</s:connection-name>
+      <s:classification-server-url>{map:get($form-post, 'classification-server-url')}</s:classification-server-url>
+      <s:classification-description>{map:get($form-post, 'classification-description')}</s:classification-description>
+      <s:article-type>{map:get($form-post, 'article-type')}</s:article-type>
+      <s:root-element>{map:get($form-post, 'root-element')}</s:root-element>
+      <s:response-element>{map:get($form-post, 'response-element')}</s:response-element>
+      <s:response-namespace>{map:get($form-post, 'response-namespace')}</s:response-namespace>
+      <s:classification-timeout>{map:get($form-post, 'classification-timeout')}</s:classification-timeout>
+      <s:title>{map:get($form-post, 'title')}</s:title>
+      <s:body>{map:get($form-post, 'body')}</s:body>
+      <s:body-type>{map:get($form-post, 'body-type')}</s:body-type>
+      <s:clustering-type>{map:get($form-post, 'clustering-type')}</s:clustering-type>
+      <s:clustering-threshold>{map:get($form-post, 'clustering-threshold')}</s:clustering-threshold>
+      <s:threshold>{map:get($form-post, 'threshold')}</s:threshold>
+      <s:language>{map:get($form-post, 'language')}</s:language>
+      {
+      let $rulebases := map:get($form-post, 'rulebases')
+      return
+        if ( fn:exists($rulebases) ) then
+          element s:rulebases {
+            $rulebases ! element s:rulebase { . }
+          }
+        else
+          ()
+      }
+    </s:classification-settings>
+  let $uri := "/classification-settings/" || sem:uuid-string() || ".xml"
+  let $_ :=  xdmp:document-insert($uri, $doc, (),($c:classification-rules))
+  return $uri
+};
+
+declare function c:list-configurations() as map:map {
 };
