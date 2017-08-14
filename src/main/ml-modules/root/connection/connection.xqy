@@ -2,9 +2,9 @@ xquery version '1.0-ml';
 
 module namespace c = 'pipeline:connection';
 import module namespace functx = "http://www.functx.com" at "/MarkLogic/functx/functx-1.0-nodoc-2007-01.xqy";
+import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
 
 declare namespace s = "smartlogic:classification:settings";
-
 declare variable $c:collection-name as xs:string := 'classification-rules';
 
 declare option xdmp:mapping 'false';
@@ -292,14 +292,36 @@ declare function c:list-connections() as map:map* {
   cts:search(fn:collection($c:collection-name),
     cts:element-query(xs:QName("s:connection-name"), cts:true-query()),
     cts:index-order(cts:element-reference(xs:QName("s:connection-name")))
-    )
+    )/s:classification-settings
     !
     map:new((
-      map:entry('connection-name', ./s:classification-settings/s:connection-name/text() ),
+      map:entry('connection-name', ./s:connection-name/text() ),
+      map:entry('classification-description',./s:classification-description/text()),
+      map:entry('domains', c:get-domains(./s:connection-name/text()) ),
       map:entry('uri', xdmp:node-uri(.))
     ))
 };
 
 declare function c:delete-connection($uri as xs:string) as empty-sequence() {
   xdmp:document-delete($uri)
+};
+
+declare function c:get-domains($pipeline-name as xs:string) as element(dom:domain)* {
+  let $eval :=
+    'xquery version "1.0-ml"; ' ||
+    'import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy"; ' ||
+    'import module namespace p = "http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy"; ' ||
+    'declare variable $pipe-line as xs:string external; ' ||
+    'dom:domains()[p:get-by-id(./dom:pipeline)[p:pipeline-name = $pipe-line]] '
+  let $options :=
+    <options xmlns="xdmp:eval">
+      <database>{xdmp:triggers-database()}</database>
+    </options>
+
+  let $vars := map:new ((
+    map:entry(xdmp:key-from-QName(fn:QName('','pipe-line')), $pipeline-name)
+  ))
+
+  return
+    xdmp:eval($eval, $vars, $options)
 };
