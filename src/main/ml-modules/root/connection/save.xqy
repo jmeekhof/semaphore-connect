@@ -8,12 +8,7 @@ let $headers := eput:get-request-headers()
 let $method := eput:get-request-method($headers)
 
 (:determine if this is new or updated :)
-let $uri := xdmp:get-request-field("uri")
+let $form-post := c:init-form-vars()
+let $doc-uri := c:save-configuration($form-post)
 return
-if (fn:exists($uri) ) then
-  () (:update logichandler:)
-else
-  let $form-post := c:init-form-vars()
-  let $doc-uri := c:save-configuration($form-post)
-  return
-    $doc-uri
+  xdmp:redirect-response("/index.xqy")
