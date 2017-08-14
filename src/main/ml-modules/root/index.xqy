@@ -22,7 +22,7 @@ let $content := (
                   <h4 class="m-t-xs m-b-xs text-center">Connectors</h4>
                 </div>
                 <div class="panel-body text-center">
-                  <a href="/connection/edit.xqy" class="btn m-b-xs btn-success">Add Connection</a>
+                  <a href="/connection/add.xqy" class="btn m-b-xs btn-success">Add Connection</a>
                 </div>
                 <form class="form m-b-none" action="/connections/update.html" method="POST" enctype="multipart/form-data">
                   <table class="table table-hover m-b-none">
