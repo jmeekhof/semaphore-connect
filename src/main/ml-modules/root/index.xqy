@@ -24,7 +24,6 @@ let $content := (
                 <div class="panel-body text-center">
                   <a href="/connection/add.xqy" class="btn m-b-xs btn-success">Add Connection</a>
                 </div>
-                <form class="form m-b-none" action="/connections/update.html" method="POST" enctype="multipart/form-data">
                   <table class="table table-hover m-b-none">
                     <tbody>
                       <!-- list existing connectors here -->
@@ -50,7 +49,6 @@ let $content := (
                       }
                     </tbody>
                   </table>
-                </form>
               </div>
             </div>
             <div xmlns="" class="results col-md-9">
