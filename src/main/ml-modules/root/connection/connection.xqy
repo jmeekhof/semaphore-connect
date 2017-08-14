@@ -28,8 +28,9 @@ declare function c:init-form-vars() as map:map {
     map:entry('clustering-type', xdmp:get-request-field( 'clustering-type' ,'default')),
     map:entry('clustering-threshold',xdmp:get-request-field('clustering-threshold' ,'20')),
     map:entry('threshold', xdmp:get-request-field('threshold' ,'48')),
-    map:entry('language', xdmp:get-request-field( 'language' ,'')),
-    map:entry('rulebases', (xdmp:get-request-field('rulebase')) )
+    map:entry('language', xdmp:get-request-field('language' ,'')),
+    map:entry('rulebases', (xdmp:get-request-field('rulebase'))),
+    map:entry('uri', xdmp:get-request-field("uri"))
   ) )
 };
 
@@ -277,7 +278,11 @@ declare function c:save-configuration($form-post as map:map) as xs:string {
           ()
       }
     </s:classification-settings>
-  let $uri := "/classification-settings/" || sem:uuid-string() || ".xml"
+  let $uri :=
+    if ( map:contains($form-post, 'uri' ) ) then
+      map:get($form-post, 'uri')
+    else
+      "/classification-settings/" || sem:uuid-string() || ".xml"
   let $_ :=  xdmp:document-insert($uri, $doc, (),($c:collection-name))
   return $uri
 };
