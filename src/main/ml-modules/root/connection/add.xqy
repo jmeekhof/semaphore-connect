@@ -6,14 +6,19 @@ import module namespace c = 'pipeline:connection' at '/connection/connection.xqy
 declare option xdmp:mapping "false";
 declare option xdmp:output "method=html";
 
-
+let $uri := xdmp:get-request-field("uri")
 let $title := "Semaphore Connector &mdash; Add Connection"
 
 let $content := (
   <div class="wrapper">
     <div class="row">
       <div class="connections main col-lg-8">
-      {c:new-connection-form()}
+      {
+      if ( fn:exists($uri) ) then
+        c:edit-connection-form($uri)
+      else
+        c:new-connection-form()
+      }
       </div>
       <div class="col-lg-4">
         <div class="panel">

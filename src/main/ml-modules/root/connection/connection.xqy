@@ -33,12 +33,40 @@ declare function c:init-form-vars() as map:map {
   ) )
 };
 
-declare function c:new-connection-form() {
+declare function c:read-config($uri as xs:string) as map:map {
+  let $doc := fn:doc($uri)/s:classification-settings
+  let $r-val := map:new( (
+    map:entry('connection-name', $doc/s:connection-name),
+    map:entry('classification-server-url', $doc/s:classification-server-url),
+    map:entry('classification-description', xdmp:get-request-field( 'classification-description','')),
+    map:entry('article-type', $doc/s:article-type),
+    map:entry('root-element', xdmp:get-request-field( 'root-element','.')),
+    map:entry('response-element', xdmp:get-request-field( 'response-element','meta')),
+    map:entry('response-namespace', $doc/s:response-namespace),
+    map:entry('classification-timeout', xdmp:get-request-field( 'classification-timeout' ,'300')),
+    map:entry('title',xdmp:get-request-field( 'title' ,'title/text()')),
+    map:entry('body', $doc/s:body),
+    map:entry('body-type', $doc/s:body-type),
+    map:entry('clustering-type', xdmp:get-request-field( 'clustering-type' ,'default')),
+    map:entry('clustering-threshold',$doc/s:clustering-threshold),
+    map:entry('threshold', $doc/s:threshold),
+    map:entry('language', $doc/s:language),
+    map:entry('rulebases', ($doc/s:rulebases/*) )
+
+  ) )
+  return $r-val
+};
+
+declare function c:new-connection-form() as element() {
   c:connection-form(c:init-form-vars())
 };
 
+declare function c:edit-connection-form($uri as xs:string) as element() {
+  c:connection-form(c:read-config($uri))
+};
+
 declare function
-c:connection-form($defaults as map:map) as element()* {
+c:connection-form($defaults as map:map) as element() {
   <form class="form" action="/connection/save.xqy" method="POST" enctype="multipart/form-data" onsubmit="x = document.getElementById('myTable').rows.length; document.getElementById('filterCount').value = x; var xslt = document.getElementById('xslt').value; document.getElementById('filenameXSL').value = xslt; var checked = document.getElementById('toggleForm').checked; document.getElementById('useXSL').value = checked;  var checked = document.getElementById('UGK').checked; document.getElementById('useGK').value = checked">
     <input type="hidden" name="myuri" value="/pipelines/2558146824718105252.xml"/>
     <input type="hidden" name="filterCount" id="filterCount"/>
@@ -266,3 +294,4 @@ declare function c:list-configurations() as map:map* {
       map:entry('uri', xdmp:node-uri(.))
     ))
 };
+
