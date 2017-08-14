@@ -3,6 +3,7 @@ xquery version '1.0-ml';
 module namespace c = 'pipeline:connection';
 import module namespace functx = "http://www.functx.com" at "/MarkLogic/functx/functx-1.0-nodoc-2007-01.xqy";
 import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
+declare namespace html = "http://www.w3.org/1999/xhtml";
 
 declare namespace s = "smartlogic:classification:settings";
 declare variable $c:collection-name as xs:string := 'classification-rules';
@@ -324,4 +325,25 @@ declare function c:get-domains($pipeline-name as xs:string) as element(dom:domai
 
   return
     xdmp:eval($eval, $vars, $options)
+};
+
+declare function c:get-databases() as element(html:option)* {
+  let $current-db := xdmp:database()
+
+  return xdmp:databases() !
+    element html:option {
+      let $db-name := xdmp:database-name(.)
+      return
+      (
+        attribute html:value { $db-name },
+        (
+        if ( $current-db = . ) then
+          attribute selected { 'selected' }
+        else
+          ()
+        ),
+        $db-name
+      )
+    }
+
 };

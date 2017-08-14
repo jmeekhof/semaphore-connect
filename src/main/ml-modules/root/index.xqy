@@ -12,6 +12,8 @@ let $title := xdmp:database-name(xdmp:database())
 
 let $connectors := c:list-connections()
 
+let $database-names := c:get-databases()
+
 let $content := (
     <section class="animated fadeIn w-f">
       <section class="hbox stretch">
@@ -105,12 +107,19 @@ let $content := (
                        : class="btn btn-sm btn-success"
                        : data-toggle="modal"
                        : href="#deploy"
-                       : onClick="document.getElementById('fdeploy').action = '/deploy/dodeploy.html?myuri={fn:string($r//*[fn:local-name()="u"])}';document.getElementById('dLabel').innerHTML = '&lt;p&gt;Please select the Database and Domain where pipeline &lt;strong&gt;{fn:string($r//*[fn:local-name()='pipeline-name'])}&lt;/strong&gt; will be deployed.&lt;/p&gt;'">Deploy</a>
+                       : onClick="document.getElementById('fdeploy').action =
+                       : '/deploy/dodeploy.html?
+                       : myuri={fn:string($r//*[fn:local-name()="u"])}';
+                       : document.getElementById('dLabel').innerHTML =
+                       : '&lt;p&gt;Please select the Database and Domain where pipeline &lt;
+                       : strong&gt;
+                       : {fn:string($r//*[fn:local-name()='pipeline-name'])}&lt;
+                       : /strong&gt; will be deployed.&lt;/p&gt;'">Deploy</a>
                        :)
                       element td {
                         element a {
                           attribute class {"btn btn-sm btn-success"},
-                          attribute data-toggle {"modal" },
+                          attribute data-toggle {"modal"},
                           attribute href {"#deploy"},
                           "Deploy"
                         }
@@ -146,8 +155,33 @@ let $content := (
           </div>
         </div>
       </section>
-    </section>
+    </section>,
+    <div class="modal fade" id="deploy" tabindex="-1" role="dialog" aria-labelledby="newModel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h5 class="modal-title">Deploy</h5>
+          </div>
+          <div class="modal-body">
+            <label id="dLabel">.</label>
+              <div xmlns="http://www.w3.org/1999/xhtml" class="deploy main">
+                <form id="fdeploy" action="/deploy/dodeploy.html?myuri=" method="POST" enctype="multipart/form-data">
+                  <div class="form-group">
+                    <select class="form-control input-sm" value="dblist" name="dblist" id="dblist">
+                      {$database-names}
+                    </select>
+                  </div>
+                </form>
+              </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
 )
+
+
 
 return
   l:assemble-page-default( $title, $content)
