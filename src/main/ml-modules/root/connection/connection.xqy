@@ -51,7 +51,8 @@ declare function c:read-config($uri as xs:string) as map:map {
     map:entry('clustering-threshold',$doc/s:clustering-threshold),
     map:entry('threshold', $doc/s:threshold),
     map:entry('language', $doc/s:language),
-    map:entry('rulebases', ($doc/s:rulebases/*) )
+    map:entry('rulebases', ($doc/s:rulebases/*) ),
+    map:entry('uri', $uri)
 
   ) )
   return $r-val
@@ -67,11 +68,8 @@ declare function c:edit-connection-form($uri as xs:string) as element() {
 
 declare function
 c:connection-form($defaults as map:map) as element() {
-  <form class="form" action="/connection/save.xqy" method="POST" enctype="multipart/form-data" onsubmit="x = document.getElementById('myTable').rows.length; document.getElementById('filterCount').value = x; var xslt = document.getElementById('xslt').value; document.getElementById('filenameXSL').value = xslt; var checked = document.getElementById('toggleForm').checked; document.getElementById('useXSL').value = checked;  var checked = document.getElementById('UGK').checked; document.getElementById('useGK').value = checked">
-    <input type="hidden" name="myuri" value="/pipelines/2558146824718105252.xml"/>
-    <input type="hidden" name="filterCount" id="filterCount"/>
-    <input type="hidden" id="filenameXSL" name="filenameXSL" value="DefaultXSL.xsl"/>
-    <input type="hidden" id="useXSL" name="useXSL" value="false"/>
+  <form class="form" action="/connection/save.xqy?uri={map:get($defaults, 'uri')}"
+    method="POST" enctype="multipart/form-data">
     <input type="hidden" id="useGK" name="useGK" value="false"/>
     <div class="panel">
       <div class="panel-heading bg-gradient">
