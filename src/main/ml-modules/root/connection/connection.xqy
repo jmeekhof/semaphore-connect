@@ -287,7 +287,7 @@ declare function c:save-configuration($form-post as map:map) as xs:string {
   return $uri
 };
 
-declare function c:list-configurations() as map:map* {
+declare function c:list-connections() as map:map* {
 
   cts:search(fn:collection($c:collection-name),
     cts:element-query(xs:QName("s:connection-name"), cts:true-query()),

@@ -9,7 +9,7 @@ declare option xdmp:output "method=xhtml";
 
 let $title := xdmp:database-name(xdmp:database())
 
-let $connectors := c:list-configurations()
+let $connectors := c:list-connections()
 
 let $content := (
     <section class="animated fadeIn w-f">
