@@ -290,7 +290,9 @@ declare function c:save-configuration($form-post as map:map) as xs:string {
 declare function c:list-configurations() as map:map* {
 
   cts:search(fn:collection($c:collection-name),
-    cts:element-query(xs:QName("s:connection-name"), cts:true-query()))
+    cts:element-query(xs:QName("s:connection-name"), cts:true-query()),
+    cts:index-order(cts:element-reference(xs:QName("s:connection-name")))
+    )
     !
     map:new((
       map:entry('connection-name', ./s:classification-settings/s:connection-name/text() ),
