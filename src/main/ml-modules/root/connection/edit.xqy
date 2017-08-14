@@ -4,10 +4,10 @@ import module namespace l = 'pipeline:layout:html' at '/modules/layout.xqy';
 import module namespace c = 'pipeline:connection' at '/connection/connection.xqy';
 
 declare option xdmp:mapping "false";
-declare option xdmp:output "method=html";
+declare option xdmp:output "method=xhtml";
 
 let $uri := xdmp:get-request-field("uri")
-let $title := "Semaphore Connector &mdash; Add Connection"
+let $title := "Semaphore Connector &mdash; Edit Connection"
 
 let $content := (
   <div class="wrapper">
