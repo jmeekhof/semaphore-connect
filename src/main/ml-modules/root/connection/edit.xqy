@@ -8,6 +8,11 @@ declare option xdmp:mapping "false";
 declare option xdmp:output "method=xhtml";
 
 let $uri := xdmp:get-request-field("uri")
+return
+if ( fn:not(fn:exists($uri))  ) then
+  xdmp:redirect-response("/index.xqy")
+else
+
 let $title := "Semaphore Connector &mdash; Edit Connection"
 
 let $content := (
