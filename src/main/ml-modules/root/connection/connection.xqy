@@ -349,26 +349,30 @@ declare function c:get-databases() as element(option)* {
 
   return xdmp:databases() !
     element option {
-      let $db-name := xdmp:database-name(.)
-      return
-      (
-        attribute value { $db-name },
+        attribute value { . },
         (
         if ( $current-db = . ) then
           attribute selected { 'selected' }
         else
           ()
         ),
-        $db-name
-      )
+        xdmp:database-name(.)
     }
-
 };
 
 declare function c:get-domains() as element(option)* {
-  dom:domains() !
-  element option {
-    attribute value { ./dom:domain-id/text() },
-  ./dom:domain-name/text()
-  }
+  let $eval :=
+  "xquery version '1.0-ml'; " ||
+  'import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy"; ' ||
+  "  dom:domains() ! "||
+  "  element option { "||
+  "    attribute value { ./dom:domain-id/text() }, "||
+  "  ./dom:domain-name/text() "||
+  "  } "
+
+  let  $options :=
+    <options xmlns="xdmp:eval">
+      <database>{xdmp:triggers-database()}</database>
+    </options>
+  return xdmp:eval($eval, (), $options)
 };
