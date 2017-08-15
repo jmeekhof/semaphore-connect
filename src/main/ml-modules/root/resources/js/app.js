@@ -19,7 +19,12 @@ function deleteRuleBase() {
     }
 }
 
-function setDeploy(pipelineName) {
-  var span = document.getElementById("dLabel");
-  span.textContent = "Please select the Database and Domain where pipeline " + pipelineName + " will be deployed.";
+function setDeploy(pipelineName, configURI) {
+  var label = document.getElementById("dLabel");
+  label.textContent = "Please select the Database and Domain where pipeline " + pipelineName + " will be deployed.";
+
+  var input = document.getElementById('deploy-uri');
+  input.value = configURI;
+
+
 }
