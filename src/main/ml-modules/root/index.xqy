@@ -122,7 +122,11 @@ let $content := (
                           attribute class {"btn btn-sm btn-success"},
                           attribute data-toggle {"modal"},
                           attribute href {"#deploy"},
-                          attribute onClick {"setDeploy('" || map:get(.,'connection-name') || "')"},
+                          attribute onClick {
+                            "setDeploy('" ||
+                              map:get(.,'connection-name') || "','" ||
+                              map:get(.,'uri') ||
+                              "')"},
                           "Deploy"
                         }
                       },(:deploy:)
@@ -185,7 +189,7 @@ let $content := (
                     (only select if not previously deployed to the above)</input>
                   </div>
                   <div class="modal-footer">
-                    <input type="hidden" value="" name="myURI" id="myURI"/>
+                    <input type="hidden" value="" name="uri" id="deploy-uri"/>
                     <input type="submit" class="btn btn-sm btn-primary" value="Deploy Pipeline Configuration"/>&nbsp;
                     <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">Cancel</button>
                   </div>
