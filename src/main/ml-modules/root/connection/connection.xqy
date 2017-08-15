@@ -235,7 +235,24 @@ c:connection-form($defaults as map:map) as element() {
         <h5 class="m-t-xs m-b-xs">Rulebase class name</h5>
       </div>
       <table class="table table-striped" id="myTable" name="myTable">
-        <tbody/>
+        <tbody>
+        {
+
+        map:get($defaults, 'rulebases') !
+        element tr {
+          element td {
+            element input {
+              attribute name { 'rulebase' },
+              attribute value { . },
+              attribute type {"text"},
+              attribute class {"form-control input-sm"},
+              attribute size {"30"}
+            }
+          }
+        }
+
+        }
+        </tbody>
       </table>
       <div class="panel-footer">
         <input type="button" class="btn btn-sm btn-primary m-r-xs" onclick="createRuleBase()" value="Add Rulebase"/>

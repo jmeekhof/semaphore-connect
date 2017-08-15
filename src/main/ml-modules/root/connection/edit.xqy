@@ -19,12 +19,7 @@ let $content := (
   <div class="wrapper">
     <div class="row">
       <div class="connections main col-lg-8">
-      {
-      if ( fn:exists($uri) ) then
-        c:edit-connection-form($uri)
-      else
-        c:new-connection-form()
-      }
+      { c:edit-connection-form($uri) }
       </div>
       <div class="col-lg-4">
         <div class="panel">
