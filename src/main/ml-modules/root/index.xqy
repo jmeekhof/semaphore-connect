@@ -13,6 +13,7 @@ let $title := xdmp:database-name(xdmp:database())
 let $connectors := c:list-connections()
 
 let $database-names := c:get-databases()
+let $domain-names := c:get-domains()
 
 let $content := (
     <section class="animated fadeIn w-f">
@@ -156,21 +157,38 @@ let $content := (
         </div>
       </section>
     </section>,
+
     <div class="modal fade" id="deploy" tabindex="-1" role="dialog" aria-labelledby="newModel" aria-hidden="true">
-      <div class="modal-dialog">
+      <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h5 class="modal-title">Deploy</h5>
           </div>
           <div class="modal-body">
-            <label id="dLabel">.</label>
-              <div xmlns="http://www.w3.org/1999/xhtml" class="deploy main">
-                <form id="fdeploy" action="/deploy/dodeploy.html?myuri=" method="POST" enctype="multipart/form-data">
+            <label id="dLabel">
+            Please select the Database and Domain where pipeline <span id="pipeline-name"/> will be deployed.
+            </label>
+              <div class="deploy main">
+                <form id="fdeploy" action="/connection/deploy.xqy" method="POST" enctype="multipart/form-data">
                   <div class="form-group">
-                    <select class="form-control input-sm" value="dblist" name="dblist" id="dblist">
+                    <select class="form-control input-sm" name="database-id" id="database-id">
                       {$database-names}
                     </select>
+                  </div>
+                  <div class="form-group">
+                    <select class="form-control input-sm" name="domain-id" id="domain-id">
+                      {$domain-names}
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <input type="checkbox" name="deploy-cpf" id="deploy-cpf">&nbsp;<b>Deploy Content Conversion Processing (CPF) pipelines</b>
+                    (only select if not previously deployed to the above)</input>
+                  </div>
+                  <div class="modal-footer">
+                    <input type="hidden" value="" name="myURI" id="myURI"/>
+                    <input type="submit" class="btn btn-sm btn-primary" value="Deploy Pipeline Configuration"/>&nbsp;
+                    <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">Cancel</button>
                   </div>
                 </form>
               </div>
