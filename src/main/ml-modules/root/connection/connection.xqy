@@ -327,15 +327,15 @@ declare function c:get-domains($pipeline-name as xs:string) as element(dom:domai
     xdmp:eval($eval, $vars, $options)
 };
 
-declare function c:get-databases() as element(html:option)* {
+declare function c:get-databases() as element(option)* {
   let $current-db := xdmp:database()
 
   return xdmp:databases() !
-    element html:option {
+    element option {
       let $db-name := xdmp:database-name(.)
       return
       (
-        attribute html:value { $db-name },
+        attribute value { $db-name },
         (
         if ( $current-db = . ) then
           attribute selected { 'selected' }
@@ -346,4 +346,12 @@ declare function c:get-databases() as element(html:option)* {
       )
     }
 
+};
+
+declare function c:get-domains() as element(option)* {
+  dom:domains() !
+  element option {
+    attribute value { ./dom:domain-id/text() },
+  ./dom:domain-name/text()
+  }
 };
