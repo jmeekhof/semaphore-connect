@@ -122,6 +122,7 @@ let $content := (
                           attribute class {"btn btn-sm btn-success"},
                           attribute data-toggle {"modal"},
                           attribute href {"#deploy"},
+                          attribute onClick {"setDeploy('" || map:get(.,'connection-name') || "')"},
                           "Deploy"
                         }
                       },(:deploy:)
@@ -166,9 +167,7 @@ let $content := (
             <h5 class="modal-title">Deploy</h5>
           </div>
           <div class="modal-body">
-            <label id="dLabel">
-            Please select the Database and Domain where pipeline <span id="pipeline-name"/> will be deployed.
-            </label>
+            <label id="dLabel">.</label>
               <div class="deploy main">
                 <form id="fdeploy" action="/connection/deploy.xqy" method="POST" enctype="multipart/form-data">
                   <div class="form-group">

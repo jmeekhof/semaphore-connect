@@ -19,3 +19,7 @@ function deleteRuleBase() {
     }
 }
 
+function setDeploy(pipelineName) {
+  var span = document.getElementById("dLabel");
+  span.textContent = "Please select the Database and Domain where pipeline " + pipelineName + " will be deployed.";
+}
