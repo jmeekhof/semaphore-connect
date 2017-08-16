@@ -3,6 +3,7 @@ xquery version '1.0-ml';
 module namespace c = 'pipeline:connection';
 import module namespace functx = "http://www.functx.com" at "/MarkLogic/functx/functx-1.0-nodoc-2007-01.xqy";
 import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
+import module namespace p = "http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";
 declare namespace html = "http://www.w3.org/1999/xhtml";
 declare namespace e = "xdmp:eval";
 
@@ -381,6 +382,41 @@ declare function c:pipeline-exists($pipeline-name as xs:string) as xs:boolean {
 
   let $vars := map:new( (
     map:entry( xdmp:key-from-QName(fn:QName('','pipeline-name')), $pipeline-name)
+  ) )
+
+  return xdmp:eval($eval, $vars, $c:trigger-options)
+};
+
+declare function c:add-pipeline($cfg as map:map) as xs:unsignedLong {
+  let $eval :=
+    "  xquery version '1.0-ml'; " ||
+    "  import module namespace p = 'http://marklogic.com/cpf/pipelines' at '/MarkLogic/cpf/pipelines.xqy'; " ||
+    "  declare variable $cfg-doc as node() external; " ||
+    "  declare variable $cfg as map:map external; " ||
+    "  declare option xdmp:mapping 'false'; " ||
+    " " ||
+    "  let $action := p:action('/classify.xqy', " ||
+    "    'This classifies our document against the classification server', " ||
+    "    <options><config>{$cfg-doc}</config></options> " ||
+    "  ) " ||
+    " " ||
+    "  return  " ||
+    "    p:create( " ||
+    "      map:get($cfg, 'connection-name'), " ||
+    "      map:get($cfg, 'classification-description'), " ||
+    "      (), " ||
+    "      (), " ||
+    "      ( " ||
+    "        p:status-transition('created','',(),(),(),$action ,()), " ||
+    "        p:status-transition('updated', '',(),(),(),$action ,()), " ||
+    "        p:status-transition('deleted','',(),(),(),(),()) " ||
+    "      ), " ||
+    "      () " ||
+    "    ) "
+
+  let $vars := map:new( (
+    map:entry(xdmp:key-from-QName(fn:QName("","cfg-doc")), fn:doc(map:get($cfg,'uri'))),
+    map:entry(xdmp:key-from-QName(fn:QName("","cfg")), $cfg)
   ) )
 
   return xdmp:eval($eval, $vars, $c:trigger-options)
