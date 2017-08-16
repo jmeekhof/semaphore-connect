@@ -4,9 +4,11 @@ module namespace c = 'pipeline:connection';
 import module namespace functx = "http://www.functx.com" at "/MarkLogic/functx/functx-1.0-nodoc-2007-01.xqy";
 import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
 declare namespace html = "http://www.w3.org/1999/xhtml";
+declare namespace e = "xdmp:eval";
 
 declare namespace s = "smartlogic:classification:settings";
 declare variable $c:collection-name as xs:string := 'classification-rules';
+declare variable $c:trigger-options as element(e:options) := <e:options><e:database>{xdmp:triggers-database()}</e:database></e:options>;
 
 declare option xdmp:mapping 'false';
 
@@ -331,17 +333,13 @@ declare function c:get-domains($pipeline-name as xs:string) as element(dom:domai
     'import module namespace p = "http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy"; ' ||
     'declare variable $pipe-line as xs:string external; ' ||
     'dom:domains()[p:get-by-id(./dom:pipeline)[p:pipeline-name = $pipe-line]] '
-  let $options :=
-    <options xmlns="xdmp:eval">
-      <database>{xdmp:triggers-database()}</database>
-    </options>
 
   let $vars := map:new ((
     map:entry(xdmp:key-from-QName(fn:QName('','pipe-line')), $pipeline-name)
   ))
 
   return
-    xdmp:eval($eval, $vars, $options)
+    xdmp:eval($eval, $vars, $c:trigger-options)
 };
 
 declare function c:get-databases() as element(option)* {
@@ -370,11 +368,7 @@ declare function c:get-domains() as element(option)* {
   "  ./dom:domain-name/text() "||
   "  } "
 
-  let  $options :=
-    <options xmlns="xdmp:eval">
-      <database>{xdmp:triggers-database()}</database>
-    </options>
-  return xdmp:eval($eval, (), $options)
+  return xdmp:eval($eval, (), $c:trigger-options)
 };
 
 declare function c:pipeline-exists($pipeline-name as xs:string) as xs:boolean {
@@ -389,10 +383,5 @@ declare function c:pipeline-exists($pipeline-name as xs:string) as xs:boolean {
     map:entry( xdmp:key-from-QName(fn:QName('','pipeline-name')), $pipeline-name)
   ) )
 
-  let $options :=
-    <options xmlns="xdmp:eval">
-      <database>{xdmp:triggers-database()}</database>
-    </options>
-
-  return xdmp:eval($eval, $vars, $options)
+  return xdmp:eval($eval, $vars, $c:trigger-options)
 };
