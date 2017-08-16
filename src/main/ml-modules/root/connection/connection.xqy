@@ -376,3 +376,23 @@ declare function c:get-domains() as element(option)* {
     </options>
   return xdmp:eval($eval, (), $options)
 };
+
+declare function c:pipeline-exists($pipeline-name as xs:string) as xs:boolean {
+  let  $eval :=
+  'xquery version "1.0-ml"; '||
+  'import module namespace p = "http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy"; '||
+  'declare variable $pipeline-name as xs:string external; '||
+  'declare option xdmp:mapping "false"; '||
+  'fn:exists( p:pipelines()[p:pipeline-name = $pipeline-name] )'
+
+  let $vars := map:new( (
+    map:entry( xdmp:key-from-QName(fn:QName('','pipeline-name')), $pipeline-name)
+  ) )
+
+  let $options :=
+    <options xmlns="xdmp:eval">
+      <database>{xdmp:triggers-database()}</database>
+    </options>
+
+  return xdmp:eval($eval, $vars, $options)
+};
