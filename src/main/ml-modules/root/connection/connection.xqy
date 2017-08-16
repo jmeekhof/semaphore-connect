@@ -421,3 +421,18 @@ declare function c:add-pipeline($cfg as map:map) as xs:unsignedLong {
 
   return xdmp:eval($eval, $vars, $c:trigger-options)
 };
+
+declare function c:remove-pipeline($cfg as map:map) as empty-sequence() {
+  let $eval :=
+    "  xquery version '1.0-ml'; " ||
+    "  import module namespace p = 'http://marklogic.com/cpf/pipelines' at '/MarkLogic/cpf/pipelines.xqy'; " ||
+    "  declare variable $cfg as map:map external; " ||
+    "  declare option xdmp:mapping 'false'; " ||
+    "  p:remove(map:get($cfg, 'connection-name')) "
+
+  let $vars := map:new( (
+    map:entry(xdmp:key-from-QName(fn:QName("","cfg")), $cfg)
+  ) )
+
+  return xdmp:eval($eval, $vars, $c:trigger-options)
+};
