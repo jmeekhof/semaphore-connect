@@ -1,3 +1,6 @@
 [submodule "src/main/ml-modules/root/modules/xml-util"]
 	path = src/main/ml-modules/root/modules/xml-util
 	url = http://github.com/jmeekhof/xml-util
+[submodule "src/main/ml-modules/root/xray"]
+	path = src/main/ml-modules/root/xray
+	url = git://github.com/robwhitby/xray.git
