@@ -1,0 +1,3 @@
+[submodule "src/main/ml-modules/root/modules/xml-util"]
+	path = src/main/ml-modules/root/modules/xml-util
+	url = http://github.com/jmeekhof/xml-util
