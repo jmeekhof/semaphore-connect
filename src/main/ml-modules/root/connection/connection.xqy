@@ -318,7 +318,7 @@ declare function c:list-connections() as map:map* {
     map:new((
       map:entry('connection-name', ./s:connection-name/text() ),
       map:entry('classification-description',./s:classification-description/text()),
-      map:entry('domains', c:get-domains(./s:connection-name/text()) ),
+      map:entry('domains', c:get-domains-by-pipeline(./s:connection-name/text()) ),
       map:entry('uri', xdmp:node-uri(.))
     ))
 };
@@ -327,21 +327,19 @@ declare function c:delete-connection($uri as xs:string) as empty-sequence() {
   xdmp:document-delete($uri)
 };
 
-declare function c:get-domains($pipeline-name as xs:string) as element(dom:domain)* {
-  let $eval :=
-    'xquery version "1.0-ml"; ' ||
-    'import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy"; ' ||
-    'import module namespace p = "http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy"; ' ||
-    'declare variable $pipe-line as xs:string external; ' ||
-    'dom:domains()[p:get-by-id(./dom:pipeline)[p:pipeline-name = $pipe-line]] '
-
-  let $vars := map:new ((
-    map:entry(xdmp:key-from-QName(fn:QName('','pipe-line')), $pipeline-name)
-  ))
-
+declare function c:get-domains-by-pipeline($pipeline-name as xs:string) as element(dom:domain)* {
+  (:dom:domains()[p:get-by-id(./dom:pipeline)[p:pipeline-name =
+   : $pipeline-name]]:)
+  fn:map(function($d) {
+  let $pipelines := $d/dom:pipeline ! p:get-by-id(.)
   return
-    xdmp:eval($eval, $vars, $c:trigger-options)
+  if (fn:exists($pipelines[p:pipeline-name = $pipeline-name]) ) then
+    $d
+  else
+    ()
+  }, dom:domains())
 };
+
 
 declare function c:get-databases() as element(option)* {
   let $current-db := xdmp:database()
@@ -360,66 +358,36 @@ declare function c:get-databases() as element(option)* {
 };
 
 declare function c:get-domains() as element(option)* {
-  let $eval :=
-  "xquery version '1.0-ml'; " ||
-  'import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy"; ' ||
-  "  dom:domains() ! "||
-  "  element option { "||
-  "    attribute value { ./dom:domain-id/text() }, "||
-  "  ./dom:domain-name/text() "||
-  "  } "
-
-  return xdmp:eval($eval, (), $c:trigger-options)
+  dom:domains() !
+  element option {
+    attribute value { ./dom:domain-name/text() },
+  ./dom:domain-name/text()
+  }
 };
 
 declare function c:pipeline-exists($pipeline-name as xs:string) as xs:boolean {
-  let  $eval :=
-  'xquery version "1.0-ml"; '||
-  'import module namespace p = "http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy"; '||
-  'declare variable $pipeline-name as xs:string external; '||
-  'declare option xdmp:mapping "false"; '||
-  'fn:exists( p:pipelines()[p:pipeline-name = $pipeline-name] )'
-
-  let $vars := map:new( (
-    map:entry( xdmp:key-from-QName(fn:QName('','pipeline-name')), $pipeline-name)
-  ) )
-
-  return xdmp:eval($eval, $vars, $c:trigger-options)
+  fn:exists( p:pipelines()[p:pipeline-name = $pipeline-name] )
 };
 
 declare function c:add-pipeline($cfg as map:map) as xs:unsignedLong {
-  let $eval :=
-    "  xquery version '1.0-ml'; " ||
-    "  import module namespace p = 'http://marklogic.com/cpf/pipelines' at '/MarkLogic/cpf/pipelines.xqy'; " ||
-    "  declare variable $cfg-doc as node() external; " ||
-    "  declare variable $cfg as map:map external; " ||
-    "  declare option xdmp:mapping 'false'; " ||
-    " " ||
-    "  let $action := p:action('/classify.xqy', " ||
-    "    'This classifies our document against the classification server', " ||
-    "    <options><config>{$cfg-doc}</config></options> " ||
-    "  ) " ||
-    " " ||
-    "  return  " ||
-    "    p:create( " ||
-    "      map:get($cfg, 'connection-name'), " ||
-    "      map:get($cfg, 'classification-description'), " ||
-    "      (), " ||
-    "      (), " ||
-    "      ( " ||
-    "        p:status-transition('created','',(),(),(),$action ,()), " ||
-    "        p:status-transition('updated', '',(),(),(),$action ,()), " ||
-    "        p:status-transition('deleted','',(),(),(),(),()) " ||
-    "      ), " ||
-    "      () " ||
-    "    ) "
+  let $action := p:action('/classify.xqy',
+    'This classifies our document against the classification server',
+    <options><config>{fn:doc(map:get($cfg,'uri'))}</config></options>
+  )
 
-  let $vars := map:new( (
-    map:entry(xdmp:key-from-QName(fn:QName("","cfg-doc")), fn:doc(map:get($cfg,'uri'))),
-    map:entry(xdmp:key-from-QName(fn:QName("","cfg")), $cfg)
-  ) )
-
-  return xdmp:eval($eval, $vars, $c:trigger-options)
+  return
+    p:create(
+      map:get($cfg, 'connection-name'),
+      map:get($cfg, 'classification-description'),
+      (),
+      (),
+      (
+        p:status-transition('created','',(),(),(),$action ,()),
+        p:status-transition('updated', '',(),(),(),$action ,()),
+        p:status-transition('deleted','',(),(),(),(),())
+      ),
+      ()
+    )
 };
 
 declare function c:remove-pipeline($cfg as map:map) as empty-sequence() {
@@ -432,6 +400,56 @@ declare function c:remove-pipeline($cfg as map:map) as empty-sequence() {
 
   let $vars := map:new( (
     map:entry(xdmp:key-from-QName(fn:QName("","cfg")), $cfg)
+  ) )
+
+  return xdmp:eval($eval, $vars, $c:trigger-options)
+};
+
+declare function c:get-pipeline($cfg as map:map) as element(p:pipeline) {
+  let $eval :=
+    "  xquery version '1.0-ml'; " ||
+    "  import module namespace p = 'http://marklogic.com/cpf/pipelines' at '/MarkLogic/cpf/pipelines.xqy'; " ||
+    "  declare variable $cfg as map:map external; " ||
+    "  declare option xdmp:mapping 'false'; " ||
+    "  p:get(map:get($cfg, 'connection-name')) "
+
+  let $vars := map:new( (
+    map:entry(xdmp:key-from-QName(fn:QName("","cfg")), $cfg)
+  ) )
+
+  return xdmp:eval($eval, $vars, $c:trigger-options)
+};
+
+declare function c:add-pipeline-to-domain($domain as xs:string, $pipeline-id as xs:unsignedLong) as empty-sequence() {
+  (:
+  let $eval :=
+  " xquery version '1.0-ml'; " ||
+  " import module namespace dom = 'http://marklogic.com/cpf/domains' at '/MarkLogic/cpf/domains.xqy'; " ||
+  " declare variable $domain-name as xs:string external; " ||
+  " declare variable $pipeline-id as xs:unsignedLong external; " ||
+  " dom:add-pipeline($domain-name, $pipeline-id)"
+
+  let $vars := map:new( (
+    map:entry(xdmp:key-from-QName(fn:QName('','domain-name')), $domain),
+    map:entry(xdmp:key-from-QName(fn:QName('','pipeline-id')), $pipeline-id)
+  ) )
+
+  return xdmp:eval($eval, $vars, $c:trigger-options)
+  :)
+  dom:add-pipeline($domain, $pipeline-id)
+};
+
+declare function c:remove-pipeline-from-domain($domain as xs:string, $pipeline-id as xs:unsignedLong) as empty-sequence() {
+  let $eval :=
+  " xquery version '1.0-ml'; " ||
+  " import module namespace dom = 'http://marklogic.com/cpf/domains' at '/MarkLogic/cpf/domains.xqy'; " ||
+  " declare variable $domain-name as xs:string external; " ||
+  " declare variable $pipeline-id as xs:unsignedLong external; " ||
+  " dom:remove-pipeline($domain-name, $pipeline-id)"
+
+  let $vars := map:new( (
+    map:entry(xdmp:key-from-QName(fn:QName('','domain-name')), $domain),
+    map:entry(xdmp:key-from-QName(fn:QName('','pipeline-id')), $pipeline-id)
   ) )
 
   return xdmp:eval($eval, $vars, $c:trigger-options)
