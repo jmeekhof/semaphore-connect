@@ -18,8 +18,8 @@ xdmp:to-json(
             let $dom := json:object()
             let $_ :=
             (
-              map:put($dom, "domain-name", $domain/dom:domain-name/fn:string()),
-              map:put($dom, "domain-id", $domain/dom:domain-id/fn:string())
+              map:put($dom, "domainName", $domain/dom:domain-name/fn:string()),
+              map:put($dom, "domainId", $domain/dom:domain-id/fn:string())
             )
             return $dom
           else
