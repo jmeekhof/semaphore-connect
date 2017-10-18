@@ -151,6 +151,11 @@ let $content := (
                           attribute class {"btn btn-sm btn-default"},
                           attribute data-toggle {"modal"},
                           attribute href {"#undeploy"},
+                          attribute onClick {
+                            "setUndeploy('" ||
+                              map:get(.,'connection-name') || "','" ||
+                              map:get(.,'pipeline-id') ||
+                              "')"},
                           "Undeploy"
                         }
                       } (:undeploy:)
@@ -202,6 +207,36 @@ let $content := (
         </div>
       </div>
     </div>
+    ,
+    <div class="modal fade" id="undeploy" tabindex="-1" role="dialog" aria-labelledby="newModel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h5 class="modal-title">Undeploy</h5>
+          </div>
+          <div class="modal-body">
+            <label id="uLabel">.</label>
+              <div class="undeploy main">
+                <form id="fundeploy" action="/connection/undeploy.xqy" method="POST" enctype="multipart/form-data">
+                  <div class="form-group">
+                    <select class="form-control input-sm" name="domainid" id="domains">
+                      {$domain-names}
+                    </select>
+                  </div>
+                  <div class="modal-footer">
+                    <input type="hidden" value="" name="uri" id="deploy-uri"/>
+                    <input type="submit" class="btn btn-sm btn-primary" value="Undeploy Pipeline Configuration"/>&nbsp;
+                    <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">Cancel</button>
+                  </div>
+                </form>
+              </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
 )
 
 
