@@ -25,6 +25,27 @@ function setDeploy(pipelineName, configURI) {
 
   var input = document.getElementById('deploy-uri');
   input.value = configURI;
+}
 
+function setUndeploy(pipelineName, pipelineId) {
+  var label = document.getElementById("uLabel");
+  label.textContent = "Pipeline " + pipelineName + " with ID " + pipelineId + " is currently deployed in the following domains:";
+  $.ajax(
+      {
+      url: "/domains/by-pipeline.xqy",
+      data: {'pipeline-name': pipelineName},
+      success: populateDomainList,
+      cache: false
+      }
+      );
+}
 
+function populateDomainList( domains ) {
+  var $select = $("#domains");
+  $select.find('option').remove();
+  var $domainitems = $.map(domains, function(x) {
+    var opt = $("<option>").attr({value: x.domainId}).append(x.domainName);
+    return opt;
+  });
+  $select.append($domainitems);
 }
