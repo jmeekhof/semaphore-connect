@@ -2,13 +2,15 @@ xquery version '1.0-ml';
 
 import module namespace l = 'pipeline:layout:html' at '/modules/layout.xqy';
 import module namespace c = 'pipeline:connection' at '/connection/connection.xqy';
-import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/cpf/domains.xqy";
+declare namespace dom = "http://marklogic.com/cpf/domains";
+(:import module namespace dom = "http://marklogic.com/cpf/domains" at
+ : "/MarkLogic/cpf/domains.xqy";:)
 declare namespace html = "http://www.w3.org/1999/xhtml";
 
 declare option xdmp:mapping "false";
 declare option xdmp:output "method=xhtml";
 
-let $title := xdmp:database-name(xdmp:database())
+let $title := 'Semaphore &mdash; Connect'
 
 let $connectors := c:list-connections()
 
@@ -180,7 +182,7 @@ let $content := (
                     </select>
                   </div>
                   <div class="form-group">
-                    <select class="form-control input-sm" name="domain-id" id="domain-id">
+                    <select class="form-control input-sm" name="domain-name" id="domain-id">
                       {$domain-names}
                     </select>
                   </div>
