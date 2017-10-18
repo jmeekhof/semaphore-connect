@@ -1,6 +1,5 @@
 {
   "database-name" : "%%DATABASE%%",
-  "triggers-database": "%%TRIGGERS_DATABASE%%",
   "range-element-index" : [ {
     "scalar-type" : "string",
     "namespace-uri" : "smartlogic:classification:settings",
