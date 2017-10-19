@@ -6,6 +6,7 @@ import module namespace dom = "http://marklogic.com/cpf/domains" at "/MarkLogic/
 import module namespace p = "http://marklogic.com/cpf/pipelines" at "/MarkLogic/cpf/pipelines.xqy";
 declare namespace html = "http://www.w3.org/1999/xhtml";
 declare namespace e = "xdmp:eval";
+declare namespace error="http://marklogic.com/xdmp/error";
 
 declare namespace s = "smartlogic:classification:settings";
 declare variable $c:collection-name as xs:string := 'classification-rules';
@@ -317,14 +318,38 @@ declare function c:list-connections() as map:map* {
     !
     map:new((
       map:entry('connection-name', ./s:connection-name/text() ),
+      map:entry('pipeline-id', c:get-pipeline-by-name(./s:connection-name/fn:string())/p:pipeline-id),
       map:entry('classification-description',./s:classification-description/text()),
       map:entry('domains', c:get-domains-by-pipeline(./s:connection-name/text()) ),
       map:entry('uri', xdmp:node-uri(.))
-    ))
+   ))
+
 };
 
+
 declare function c:delete-connection($uri as xs:string) as empty-sequence() {
-  xdmp:document-delete($uri)
+  (:~
+   : Delete the config file for a connection. Look to see if this config has
+   : been used to deploy a pipeline. Remove the pipeline from the domains it's
+   : associated with then remove the pipeline.
+   :)
+  let $cfg := c:read-config($uri)
+  let $pipeline := c:get-pipeline($cfg)
+  let $_ := xdmp:log($pipeline)
+  return
+    (
+      if ( fn:exists($pipeline) ) then
+        let $domains := c:get-domains-by-pipeline($pipeline/p:pipeline-name)
+        return
+        (
+          $domains ! dom:remove-pipeline(./dom:domain-name, $pipeline/p:pipeline-id),
+          p:remove($pipeline/p:pipeline-name)
+        )
+      else
+        ()
+      ,
+      xdmp:document-delete($uri)
+    )
 };
 
 declare function c:get-domains-by-pipeline($pipeline-name as xs:string) as element(dom:domain)* {
@@ -456,8 +481,23 @@ declare function c:remove-pipeline($cfg as map:map) as empty-sequence() {
   p:remove(map:get($cfg, 'connection-name'))
 };
 
-declare function c:get-pipeline($cfg as map:map) as element(p:pipeline) {
-  p:get(map:get($cfg, 'connection-name'))
+declare function c:get-pipeline($cfg as map:map) as element(p:pipeline)? {
+  (:~
+   : Safe get pipeline. Won't throw an error if the pipeline doesn't exist.
+   :)
+    try {
+      p:get(map:get($cfg, 'connection-name'))
+    }
+    catch($e) {
+      if ( $e/error:code = "CPF-PIPELINENOTFOUND" ) then
+        ()
+      else
+        xdmp:rethrow()
+    }
+};
+
+declare function c:get-pipeline-by-name($name as xs:string) as element(p:pipeline)? {
+  c:get-pipeline(map:new(( map:entry("connection-name", $name) )) )
 };
 
 declare function c:add-pipeline-to-domain($domain as xs:string, $pipeline-id as xs:unsignedLong) as empty-sequence() {
