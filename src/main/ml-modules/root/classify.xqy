@@ -36,21 +36,39 @@ declare option xdmp:mapping "false";
  :)
 let $_ := xdmp:log(">>>>>>>>>>>>>>>HERE")
 
-let $f := function ($val, $opts, $doc) {
-  $opts/xdmp:value($val)/fn:string()
+let $f := function ($key, $val, $opts, $doc) {
+  element data {
+    attribute name { $key },
+    $opts/xdmp:value($val)/fn:string()
+  }
 }
 
-let $b := function ($val, $opts, $doc) {
-  let $xp := $f($val,$opts,$doc)
+let $b := function ($key, $val, $opts, $doc) {
+  let $xp := $f($key, $val,$opts,$doc)
   return
-  xdmp:url-encode($doc/xdmp:value($xp))
+    element data {
+      attribute name { $key },
+      fn:string-join($doc/xdmp:value($xp)) ! xdmp:url-encode(.)
+    }
+}
+
+let $at := function($key, $val, $opts, $doc) {
+  switch($f($key, $val, $opts, $doc))
+    case "MA" return element data { attribute name { "multiarticle" } }
+    default return element data { attribute name { "singlearticle" } }
 }
 
 let $opt-map := map:new((
+  map:entry("articletype",
+    map:new((
+      map:entry("config-path", "s:article-type"),
+      map:entry("data-function", $at)
+    ))
+  ),
   map:entry("title",
     map:new((
       map:entry("config-path", "s:title"),
-      map:entry("data-function", $f)
+      map:entry("data-function", $b)
     ))
   ),
   map:entry("body",
@@ -96,10 +114,7 @@ let $option-f := function($map, $options, $doc) {
       let $xp := map:get($cfg-map, "config-path")
       let $d-f := map:get($cfg-map, "data-function")
       return
-        element data {
-          attribute name { $key },
-          $d-f($xp, $options, $doc)
-        }
+        $d-f($key, $xp, $options, $doc)
     },
     map:keys($map)
   )
@@ -118,16 +133,12 @@ if (cpf:check-transition($cpf:document-uri, $cpf:transition)) then
       (<data name="UploadFile" filename="{$cpf:document-uri}" type="application/xml">{$cpf:document-uri}</data>)
     )
     :)
-    let $m-part := mpost:multipart-post($cs,"--deadbeef00--",(
-      <data name="body">{xdmp:url-encode($doc)}</data>,
-      <data name="path" />,
-      <data name="title">This is a test</data>,
-      <data name="type">XML</data>,
-      <data name="operation">CLASSIFY</data>
-    ))
+    let $m-part := mpost:multipart-post($cs,"--deadbeef00--",$data)
     let $_ := xdmp:log($m-part)
+    (:
     let $resp := xdmp:http-post($cs, (), $m-part)
     let $_ := xdmp:log($resp)
+    :)
 
     return
     (
