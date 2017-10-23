@@ -36,47 +36,82 @@ declare option xdmp:mapping "false";
  :)
 let $_ := xdmp:log(">>>>>>>>>>>>>>>HERE")
 
+let $f := function ($val, $opts, $doc) {
+  $opts/xdmp:value($val)/fn:string()
+}
+
+let $b := function ($val, $opts, $doc) {
+  let $xp := $f($val,$opts,$doc)
+  return
+  xdmp:url-encode($doc/xdmp:value($xp))
+}
+
 let $opt-map := map:new((
-  map:entry("title","s:title"),
-  map:entry("body", "s:body"),
-  map:entry("type", "s:body-type"),
-  map:entry("clustering_type", "s:clustering-type"),
-  map:entry("clustering_threshold", "s:clustering-threshold"),
-  map:entry("language", "s:language"),
+  map:entry("title",
+    map:new((
+      map:entry("config-path", "s:title"),
+      map:entry("data-function", $f)
+    ))
+  ),
+  map:entry("body",
+    map:new((
+      map:entry("config-path", "s:body"),
+      map:entry("data-function", $b)
+    ))
+  ),
+  map:entry("type",
+    map:new((
+      map:entry("config-path", "s:body-type"),
+      map:entry("data-function", $f)
+    ))
+  ),
+  map:entry("clustering_type",
+    map:new((
+      map:entry("config-path", "s:clustering-type"),
+      map:entry("data-function", $f)
+    ))
+  ),
+  map:entry("clustering_threshold",
+    map:new((
+      map:entry("config-path", "s:clustering-threshold"),
+      map:entry("data-function", $f)
+    ))
+  ),
+  map:entry("language",
+    map:new((
+      map:entry("config-path", "s:language"),
+      map:entry("data-function", $f)
+    ))
+  ),
   ()
 ))
 
 (:let $options := function($map as map:map, $options as
  :
  : element(s:classification-settings)) as element(data)* {:)
-let $options := function($map, $options) {
+let $option-f := function($map, $options, $doc) {
   fn:map(
     function($key) {
-      let $xp := map:get($map, $key)
+      let $cfg-map := map:get($map, $key)
+      let $xp := map:get($cfg-map, "config-path")
+      let $d-f := map:get($cfg-map, "data-function")
       return
         element data {
           attribute name { $key },
-          $options/xdmp:value($xp)/fn:string()
+          $d-f($xp, $options, $doc)
         }
-      (:
-      return
-        element data {
-          attribute name {$key},
-          xdmp:unpath($options || "/" || $xp)
-        }
-      :)
     },
     map:keys($map)
   )
 }
 
-let $data := $options($opt-map, $cpf:options/s:classification-settings)
-let $_ := xdmp:log($data)
 return
 if (cpf:check-transition($cpf:document-uri, $cpf:transition)) then
   try {
     let $cs := $cpf:options/s:classification-settings/s:classification-server-url/fn:string()
     let $doc := fn:doc($cpf:document-uri)
+    let $data := $option-f($opt-map, $cpf:options/s:classification-settings, $doc)
+    let $_ := xdmp:log($data)
     (:
     let $m-part :=
       mpost:multipart-post($cs,"--deadbeef00--",
