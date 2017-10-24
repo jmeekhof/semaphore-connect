@@ -232,7 +232,22 @@ c:connection-form($defaults as map:map) as element() {
             <td>Clustering Type</td>
             <td>default</td>
             <td>
-              <input type="text" class="form-control input-sm" size="30" id="clustering-type" value="{map:get($defaults, 'clustering-type')}" name="clustering-type"/>
+              <select class="form-control input-sm" id="clustering-type" name="clustering-type">
+              {
+              ("ALL","AVERAGE","AVERAGE_INCLUDING_EMPTY","COMMON","COMMON_INCLUDING_EMPTY","RMS","RMS_INCLUDING_EMPTY","NONE") !
+              (
+                element option {
+                  attribute value {.},
+                  if ( map:get($defaults, "clustering-type") = .) then
+                    attribute selected { "selected" }
+                  else
+                    ()
+                  ,
+                  .
+                }
+              )
+              }
+              </select>
             </td>
           </tr>
           <tr>
