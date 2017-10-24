@@ -140,19 +140,26 @@ if (cpf:check-transition($cpf:document-uri, $cpf:transition)) then
       xdmp:log($w-qname, "debug"),
       xdmp:log($m-qname, "debug")
       )
-    (:~TODO
-     : The META tags need to be filtered by the Rulebase Names IF they're
-     : provided.
-     : This will look something like @name =
-     : $cpf:options/s:classification-settings/s:rulebases/s:rulebase
-     :)
     let $cs-meta :=fn:map(
       function($x){
         element {$m-qname} {
           $x/@*,
           $x/fn:data()
         }
-      },$m-part/response/STRUCTUREDDOCUMENT/META)
+      },
+        (:~
+         : Filter the meta nodes IF rulebases are specified. Otherwise, return
+         : them all
+         :)
+        if ( fn:exists($cpf:options/s:classification-settings/s:rulebases)) then
+          fn:filter(
+            function($z) {
+              fn:exists($z[@name = $cpf:options/s:classification-settings/s:rulebases/s:rulebase])
+            },
+            $m-part/response/STRUCTUREDDOCUMENT/META)
+        else
+          $m-part/response/STRUCTUREDDOCUMENT/META
+      )
     return
       (
       (:~
