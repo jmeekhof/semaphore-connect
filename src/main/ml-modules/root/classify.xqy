@@ -13,29 +13,9 @@ declare variable $cpf:options as element() external;
 declare option xdmp:mapping "false";
 
 
-(:
-<opt:options xmlns:p="http://marklogic.com/cpf/pipelines" xmlns:opt="/classify.xqy">
-<s:classification-settings xmlns:s="smartlogic:classification:settings">
-<s:connection-name>Classify email</s:connection-name>
-<s:classification-server-url>http://apsrd8076:5058/</s:classification-server-url>
-<s:classification-description/>
-<s:article-type>SA</s:article-type>
-<s:root-element>.</s:root-element>
-<s:response-element>meta</s:response-element>
-<s:response-namespace>urn:namespace:here</s:response-namespace>
-<s:classification-timeout>300</s:classification-timeout>
-<s:title>title/text()</s:title>
-<s:body>/</s:body>
-<s:body-type>HTML</s:body-type>
-<s:clustering-type>default</s:clustering-type>
-<s:clustering-threshold>20</s:clustering-threshold>
-<s:threshold>48</s:threshold>
-<s:language>en</s:language>
-</s:classification-settings>
-</opt:options>
+(:~
+ : Produces a <data> for the mpost library
  :)
-let $_ := xdmp:log(">>>>>>>>>>>>>>>HERE")
-
 let $f := function ($key, $val, $opts, $doc) {
   element data {
     attribute name { $key },
@@ -43,6 +23,9 @@ let $f := function ($key, $val, $opts, $doc) {
   }
 }
 
+(:~
+ : Produces a <data> for the mpost library
+ :)
 let $b := function ($key, $val, $opts, $doc) {
   let $xp := $f($key, $val,$opts,$doc)
   return
@@ -52,12 +35,20 @@ let $b := function ($key, $val, $opts, $doc) {
     }
 }
 
+(:~
+ : Produces a <data> for the mpost library
+ :)
 let $at := function($key, $val, $opts, $doc) {
   switch($f($key, $val, $opts, $doc))
     case "MA" return element data { attribute name { "multiarticle" } }
     default return element data { attribute name { "singlearticle" } }
 }
 
+(:~
+ : This is a map of options ($cpf:options) to the <data> for mpost. Basically
+ : a map from the element to the function to transform that element to what we
+ : want for our mpost
+ :)
 let $opt-map := map:new((
   map:entry("articletype",
     map:new((
@@ -104,9 +95,10 @@ let $opt-map := map:new((
   ()
 ))
 
-(:let $options := function($map as map:map, $options as
- :
- : element(s:classification-settings)) as element(data)* {:)
+(:~
+ : This puts it all together. This applies the map to the functions with the
+ : accompanying document data
+ :)
 let $option-f := function($map, $options, $doc) {
   fn:map(
     function($key) {
@@ -120,75 +112,75 @@ let $option-f := function($map, $options, $doc) {
   )
 }
 
+(:~
+ : Now all the setup is done. Post the data to the classification server
+ :)
 return
 if (cpf:check-transition($cpf:document-uri, $cpf:transition)) then
   try {
     let $cs := $cpf:options/s:classification-settings/s:classification-server-url/fn:string()
     let $doc := fn:doc($cpf:document-uri)
     let $data := $option-f($opt-map, $cpf:options/s:classification-settings, $doc)
-    let $_ := xdmp:log($data)
-    (:
-    let $m-part :=
-      mpost:multipart-post($cs,"--deadbeef00--",
-      (<data name="UploadFile" filename="{$cpf:document-uri}" type="application/xml">{$cpf:document-uri}</data>)
-    )
-    :)
-    let $m-part := mpost:multipart-post($cs,"--deadbeef00--",$data)
-    let $_ := xdmp:log($m-part)
-    (:
-    let $resp := xdmp:http-post($cs, (), $m-part)
-    let $_ := xdmp:log($resp)
-    :)
+    let $_ := xdmp:log($data, "debug")
 
+    (:~
+     : This posts to the classification server. The return is the
+     : classification data. The full xsd is available on
+     : https://portal.smartlogic.com/docs/classification_server_-_developers_guide/appendix_-_xml_dtd
+     :)
+    let $m-part := mpost:multipart-post($cs,"--deadbeef00--",$data)
+    let $_ := xdmp:log($m-part, "debug")
+
+    let $ns := $cpf:options/s:classification-settings/s:response-namespace/fn:string()
+    let $cs-elem := $cpf:options/s:classification-settings/s:response-element/fn:string()
+    let $cs-wrap := $cpf:options/s:classification-settings/s:response-wrapper/fn:string()
+    let $w-qname := fn:QName($ns, $cs-wrap)
+    let $m-qname := fn:QName($ns, $cs-elem)
+    let $_ := (
+      xdmp:log($w-qname, "debug"),
+      xdmp:log($m-qname, "debug")
+      )
+    (:~TODO
+     : The META tags need to be filtered by the Rulebase Names IF they're
+     : provided.
+     : This will look something like @name =
+     : $cpf:options/s:classification-settings/s:rulebases/s:rulebase
+     :)
+    let $cs-meta :=fn:map(
+      function($x){
+        element {$m-qname} {
+          $x/@*,
+          $x/fn:data()
+        }
+      },$m-part/response/STRUCTUREDDOCUMENT/META)
     return
-    (
-    xdmp:log($cs),
-    xdmp:log($cpf:options)
-    )
+      (
+      (:~
+       : Remove previous rulebases if they exists, otherwise proceed as normal
+       :)
+      if ( fn:exists($doc//element()[fn:node-name(.) = $w-qname]) ) then
+        (
+        xdmp:log("meta exists", "debug"),
+
+        $doc//element()[fn:node-name(.) = $w-qname] !
+        xdmp:node-delete(.)
+        )
+      else
+        xdmp:log("meta doesn't exist", "debug")
+      ,
+      (:~
+       : This is proceding as normal
+       :)
+      xdmp:node-insert-child($doc/child::element(),
+        element { $w-qname } {
+          $cs-meta
+        }
+      ),
+      cpf:success( $cpf:document-uri, $cpf:transition, ())
+      )
   }
   catch($e) {
     cpf:failure( $cpf:document-uri, $cpf:transition, $e, () )
   }
 else
   ()
-(:
-if (cpf:check-transition($cpf:document-uri, $cpf:transition)) then
-  try {
-    let $aMsg := xdmp:set-request-time-limit(300)
-    let $doc := fn:doc( $cpf:document-uri )
-    let $doc-without-dpath := element {node-name($doc/*)} {
-      $doc/*/@*,
-      $doc/*/*[not(name(.)="meta")]
-    }
-
-    let $doc-name := $cpf:document-uri
-    let $payload := mpost:multipart-post(
-    $cpf:remote-url,
-    "------------12345xyz",
-    (
-      <data name="UploadFile" filename="{$doc-name}" type="text/plain" fulltext="yes">{$doc-without-dpath}</data>,
-      <data name="XML_INPUT" filename="/csreq-26567061.xml" type="text/xml">/csreq-26567061.xml</data>,
-      <data name="method">docs.upload</data>
-    ) )
-
-    let $meta :=  <meta>{for $x in $payload/response/STRUCTUREDDOCUMENT/META where  $x[@name="Business Segment"]
- or  $x[@name="Product Family"]
- or  $x[@name="Product Line"]
- or  $x[@name="Product"]  return $x}</meta>
-        let $a := $doc/*/meta
-        return (
-          if (exists($a))
-          then xdmp:node-delete($doc/*/meta)
-          else (),
-
-          xdmp:node-insert-child($doc/child::element(), $meta),
-          xdmp:log( "Add classification metadata ran OK" ),
-          cpf:success( $cpf:document-uri, $cpf:transition, () )
-         )
-  }
-  catch ($e) {
-    cpf:failure( $cpf:document-uri, $cpf:transition, $e, () )
-  }
-else
-  ()
-  :)
