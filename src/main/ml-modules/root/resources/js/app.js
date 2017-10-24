@@ -30,6 +30,7 @@ function setDeploy(pipelineName, configURI) {
 function setUndeploy(pipelineName, pipelineId) {
   var label = document.getElementById("uLabel");
   label.textContent = "Pipeline " + pipelineName + " with ID " + pipelineId + " is currently deployed in the following domains:";
+  $("#pipelineId").val(pipelineId);
   $.ajax(
       {
       url: "/domains/by-pipeline.xqy",
