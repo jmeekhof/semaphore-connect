@@ -210,7 +210,22 @@ c:connection-form($defaults as map:map) as element() {
             <td>Body Type</td>
             <td>HTML</td>
             <td>
-              <input type="text" class="form-control input-sm" size="30" id="body-type" name="body-type" value="HTML"/>
+              <select class="form-control input-sm" id="body-type" name="body-type">
+              {
+              ("HTML","TEXT") !
+              (
+                element option {
+                  attribute value {.},
+                  if ( map:get($defaults, "body-type") = . ) then
+                    attribute selected {"selected"}
+                  else
+                    ()
+                  ,
+                  .
+                }
+              )
+              }
+              </select>
             </td>
           </tr>
           <tr>
