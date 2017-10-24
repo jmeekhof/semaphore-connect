@@ -26,6 +26,7 @@ declare function c:init-form-vars() as map:map {
     map:entry('root-element', xdmp:get-request-field( 'root-element','.')),
     map:entry('response-element', xdmp:get-request-field( 'response-element','meta')),
     map:entry('response-namespace', xdmp:get-request-field('response-namespace' ,'urn:namespace:here')),
+    map:entry('response-wrapper', xdmp:get-request-field('redirect-response', 'classification-data')),
     map:entry('classification-timeout', xdmp:get-request-field( 'classification-timeout' ,'300')),
     map:entry('title',xdmp:get-request-field( 'title' ,'title/text()')),
     map:entry('body', xdmp:get-request-field('body' ,'/')),
@@ -49,6 +50,7 @@ declare function c:read-config($uri as xs:string) as map:map {
     map:entry('root-element', xdmp:get-request-field( 'root-element','.')),
     map:entry('response-element', xdmp:get-request-field( 'response-element','meta')),
     map:entry('response-namespace', $doc/s:response-namespace),
+    map:entry('response-wrapper', $doc/s:response-wrapper),
     map:entry('classification-timeout', xdmp:get-request-field( 'classification-timeout' ,'300')),
     map:entry('title',xdmp:get-request-field( 'title' ,'title/text()')),
     map:entry('body', $doc/s:body),
@@ -170,6 +172,14 @@ c:connection-form($defaults as map:map) as element() {
             <input type="text" class="form-control input-sm" size="20" name="response-element" id="response-element" value="{map:get($defaults, 'response-element')}"/>
           </td>
         </tr>
+        <tr>
+          <td><label>CS Response Wrapper</label></td>
+          <td>
+            <input type="text" class="form-control input-sm" size="20" name="response-wrapper" id="response-wrapper" value="{map:get($defaults, 'response-wrapper')}"/>
+          </td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
       </table>
     </div>
     <div class="panel">
@@ -281,6 +291,7 @@ declare function c:save-configuration($form-post as map:map) as xs:string {
       <s:root-element>{map:get($form-post, 'root-element')}</s:root-element>
       <s:response-element>{map:get($form-post, 'response-element')}</s:response-element>
       <s:response-namespace>{map:get($form-post, 'response-namespace')}</s:response-namespace>
+      <s:response-wrapper>{map:get($form-post, 'response-wrapper')}</s:response-wrapper>
       <s:classification-timeout>{map:get($form-post, 'classification-timeout')}</s:classification-timeout>
       <s:title>{map:get($form-post, 'title')}</s:title>
       <s:body>{map:get($form-post, 'body')}</s:body>
