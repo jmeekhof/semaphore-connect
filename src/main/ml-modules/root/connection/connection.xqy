@@ -212,7 +212,7 @@ c:connection-form($defaults as map:map) as element() {
             <td>
               <select class="form-control input-sm" id="body-type" name="body-type">
               {
-              ("HTML","TEXT") !
+              ("UNKNOWN","HTML","TEXT") !
               (
                 element option {
                   attribute value {.},
