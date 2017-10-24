@@ -22,7 +22,7 @@ declare function c:init-form-vars() as map:map {
     map:entry('connection-name', xdmp:get-request-field('connection-name' ,'Default_SCS-1')),
     map:entry('classification-server-url', xdmp:get-request-field('classification-server-url' ,'http://localhost:5058')),
     map:entry('classification-description', xdmp:get-request-field( 'classification-description','')),
-    map:entry('article-type', xdmp:get-request-field('article-type' ,'SA')),
+    map:entry('article-type', xdmp:get-request-field('article-type' ,'MA')),
     map:entry('root-element', xdmp:get-request-field( 'root-element','.')),
     map:entry('response-element', xdmp:get-request-field( 'response-element','meta')),
     map:entry('response-namespace', xdmp:get-request-field('response-namespace' ,'urn:namespace:here')),
