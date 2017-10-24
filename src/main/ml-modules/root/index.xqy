@@ -220,12 +220,12 @@ let $content := (
               <div class="undeploy main">
                 <form id="fundeploy" action="/connection/undeploy.xqy" method="POST" enctype="multipart/form-data">
                   <div class="form-group">
-                    <select class="form-control input-sm" name="domainid" id="domains">
+                    <select class="form-control input-sm" name="domain-id" id="domains">
                       {$domain-names}
                     </select>
                   </div>
                   <div class="modal-footer">
-                    <input type="hidden" value="" name="uri" id="deploy-uri"/>
+                    <input type="hidden" value="" name="pipeline-id" id="pipelineId"/>
                     <input type="submit" class="btn btn-sm btn-primary" value="Undeploy Pipeline Configuration"/>&nbsp;
                     <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">Cancel</button>
                   </div>
