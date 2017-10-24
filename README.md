@@ -71,14 +71,12 @@ mlContentDatabaseName=<triggers_database>
 
 
 3. Deploy
-- Deploy the parent project first, as this will create _this_ project's content database, and the cpf domains.
-
-```bash
-gradle mlDeploy mlDeployCpf
-```
-
-- Deploy _this_ project.
-
+- Deploy _this_ project first. The parent project depend on this projects modules database.
 ```bash
 gradle mlDeploy
+```
+
+- Deploy parent project, with cpf.
+```bash
+gradle mlDeploy mlDeployCpf
 ```
