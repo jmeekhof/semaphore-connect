@@ -143,7 +143,11 @@ if (cpf:check-transition($cpf:document-uri, $cpf:transition)) then
     let $cs-meta :=fn:map(
       function($x){
         element {$m-qname} {
-          $x/@*,
+          $x/@* !
+          (
+          element {fn:QName($ns,fn:local-name(.))} { fn:data(.) }
+          ),
+          element {fn:QName($ns, "nameValueScore")} { fn:string-join( ($x/@name, $x/@value, $x/@score), "^") },
           $x/fn:data()
         }
       },
