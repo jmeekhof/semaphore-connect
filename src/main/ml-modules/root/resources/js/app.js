@@ -3,8 +3,10 @@ function createRuleBase () {
     var table = document.getElementById("myTable");
     var row = table.insertRow(x);
     var cell3 = row.insertCell(0);
+    var cell4 = row.insertCell(1);
     x=x+1
     cell3.innerHTML = '<input type="text" class="form-control input-sm" size="30" name="rulebase"  value=""/>';
+    cell4.innerHTML = '<input type="text" class="form-control input-sm" size="30" name="rulebase-namespace"  value=""/>';
     x = document.getElementById("myTable").rows.length;
     document.getElementById("filterCount").value = (x + 1);
 }
