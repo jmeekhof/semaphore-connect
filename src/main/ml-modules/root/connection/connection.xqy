@@ -36,6 +36,7 @@ declare function c:init-form-vars() as map:map {
     map:entry('threshold', xdmp:get-request-field('threshold' ,'48')),
     map:entry('language', xdmp:get-request-field('language' ,'')),
     map:entry('rulebases', (xdmp:get-request-field('rulebase'))),
+    map:entry('rulebases-namespace', (xdmp:get-request-field('rulebase-namespace'))),
     map:entry('uri', xdmp:get-request-field("uri"))
   ) )
 };
@@ -276,18 +277,26 @@ c:connection-form($defaults as map:map) as element() {
     </div>
     <div class="panel col">
       <div class="panel-heading bg-gradient text-left">
-        <h5 class="m-t-xs m-b-xs">Rulebase class name</h5>
+        <h5 class="m-t-xs m-b-xs">Rulebase class name / Namespace</h5>
       </div>
       <table class="table table-striped" id="myTable" name="myTable">
         <tbody>
         {
-
         map:get($defaults, 'rulebases') !
         element tr {
           element td {
             element input {
               attribute name { 'rulebase' },
               attribute value { . },
+              attribute type {"text"},
+              attribute class {"form-control input-sm"},
+              attribute size {"30"}
+            }
+          },
+          element td {
+            element input {
+              attribute name { 'rulebase-namespace' },
+              attribute value { ./@namespace  },
               attribute type {"text"},
               attribute class {"form-control input-sm"},
               attribute size {"30"}
@@ -331,11 +340,23 @@ declare function c:save-configuration($form-post as map:map) as xs:string {
       <s:threshold>{map:get($form-post, 'threshold')}</s:threshold>
       <s:language>{map:get($form-post, 'language')}</s:language>
       {
-      let $rulebases := map:get($form-post, 'rulebases')
+      let $rulebases := map:get($form-post, 'rulebases'),
+        $rulebases-namespace := map:get($form-post, 'rulebases-namespace'),
+        $_ := xdmp:log($rulebases-namespace)
       return
         if ( fn:exists($rulebases) ) then
           element s:rulebases {
-            $rulebases ! element s:rulebase { . }
+            for $rb at $idx in $rulebases
+              return
+                element s:rulebase {
+                (
+                  if (fn:exists($rulebases-namespace[$idx])) then
+                    attribute namespace {$rulebases-namespace[$idx]}
+                  else
+                    ()
+                ),
+                $rb
+            }
           }
         else
           ()
