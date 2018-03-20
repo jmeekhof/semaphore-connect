@@ -12,11 +12,17 @@ declare variable $cpf:options as element() external;
 
 declare option xdmp:mapping "false";
 
-
+(:~
+ : These functions all need an arity of 4.
+ : $key, $val, $opts, & $doc
+ :
+ : Each is a basic variation of create this $key and either take the $val from
+ : the $opts structure or the $doc.
+ :)
 (:~
  : Produces a <data> for the mpost library
  :)
-let $f := function ($key, $val, $opts, $doc) {
+let $config-value-func := function ($key, $val, $opts, $doc) {
   (:~
    : This produces a value to be posted. Taken from the options document
    :)
@@ -29,12 +35,12 @@ let $f := function ($key, $val, $opts, $doc) {
 (:~
  : Produces a <data> for the mpost library
  :)
-let $b := function ($key, $val, $opts, $doc) {
+let $doc-value-func := function ($key, $val, $opts, $doc) {
   (:~
    : body function. Produces a value to be posted with a name of $key. This
    : function produces an xpath statement into the document.
    :)
-  let $xp := $f($key, $val,$opts,$doc)
+  let $xp := $config-value-func($key, $val,$opts,$doc)
 
   return
     element data {
@@ -46,12 +52,12 @@ let $b := function ($key, $val, $opts, $doc) {
 (:~
  : Produces a <data> for the mpost library
  :)
-let $at := function($key, $val, $opts, $doc) {
+let $article-type-func := function($key, $val, $opts, $doc) {
   (:~
    : Post value function. Specifically designed to handle a mutually exclusive
    : option. Multi-article vs single-article.
    :)
-  switch($f($key, $val, $opts, $doc))
+  switch($config-value-func($key, $val, $opts, $doc))
     case "MA" return element data { attribute name { "multiarticle" } }
     default return element data { attribute name { "singlearticle" } }
 }
@@ -65,49 +71,49 @@ let $opt-map := map:new((
   map:entry("articletype",
     map:new((
       map:entry("config-path", "s:article-type"),
-      map:entry("data-function", $at)
+      map:entry("data-function", $article-type-func)
     ))
   ),
   map:entry("title",
     map:new((
       map:entry("config-path", "s:title"),
-      map:entry("data-function", $b)
+      map:entry("data-function", $doc-value-func)
     ))
   ),
   map:entry("body",
     map:new((
       map:entry("config-path", "s:body"),
-      map:entry("data-function", $b)
+      map:entry("data-function", $doc-value-func)
     ))
   ),
   map:entry("type",
     map:new((
       map:entry("config-path", "s:body-type"),
-      map:entry("data-function", $f)
+      map:entry("data-function", $config-value-func)
     ))
   ),
   map:entry("clustering_type",
     map:new((
       map:entry("config-path", "s:clustering-type"),
-      map:entry("data-function", $f)
+      map:entry("data-function", $config-value-func)
     ))
   ),
   map:entry("threshold",
     map:new((
       map:entry("config-path", "s:threshold"),
-      map:entry("data-function", $f)
+      map:entry("data-function", $config-value-func)
     ))
   ),
   map:entry("clustering_threshold",
     map:new((
       map:entry("config-path", "s:clustering-threshold"),
-      map:entry("data-function", $f)
+      map:entry("data-function", $config-value-func)
     ))
   ),
   map:entry("language",
     map:new((
       map:entry("config-path", "s:language"),
-      map:entry("data-function", $f)
+      map:entry("data-function", $config-value-func)
     ))
   ),
   ()
