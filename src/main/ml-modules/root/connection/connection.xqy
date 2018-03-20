@@ -342,7 +342,7 @@ declare function c:save-configuration($form-post as map:map) as xs:string {
       }
     </s:classification-settings>
   let $uri :=
-    if ( map:contains($form-post, 'uri' ) ) then
+    if ( fn:exists(map:get($form-post, 'uri' ) ) ) then
       map:get($form-post, 'uri')
     else
       "/classification-settings/" || sem:uuid-string() || ".xml"
