@@ -22,7 +22,12 @@ declare option xdmp:mapping "false";
 (:~
  : Produces a <data> for the mpost library
  :)
-let $config-value-func := function ($key, $val, $opts, $doc) {
+let $config-value-func := function (
+  $key as xs:string,
+  $val as xs:string,
+  $opts as element()*,
+  $doc as document-node()* )
+{
   (:~
    : This produces a value to be posted. Taken from the options document
    :)
@@ -35,7 +40,12 @@ let $config-value-func := function ($key, $val, $opts, $doc) {
 (:~
  : Produces a <data> for the mpost library
  :)
-let $doc-value-func := function ($key, $val, $opts, $doc) {
+let $doc-value-func := function (
+  $key as xs:string,
+  $val as xs:string,
+  $opts as element()*,
+  $doc as document-node()* )
+{
   (:~
    : body function. Produces a value to be posted with a name of $key. This
    : function produces an xpath statement into the document.
@@ -52,7 +62,12 @@ let $doc-value-func := function ($key, $val, $opts, $doc) {
 (:~
  : Produces a <data> for the mpost library
  :)
-let $article-type-func := function($key, $val, $opts, $doc) {
+let $article-type-func := function (
+  $key as xs:string,
+  $val as xs:string,
+  $opts as element()*,
+  $doc as document-node()* )
+{
   (:~
    : Post value function. Specifically designed to handle a mutually exclusive
    : option. Multi-article vs single-article.
