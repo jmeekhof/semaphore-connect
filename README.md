@@ -2,6 +2,10 @@
 
 This application is designed to manage a CPF pipelines for a Smartlogic Classification Server on a MarkLogic database.
 
+Creating and maintaining pipeline code can be troublesome. This application abstracts each pipeline with a config document that can be edited and deployed.
+
+The name of the elements and their namespaces are all configurable with this application.
+
 ## Setup ##
 
 1. Clone this repository, and give it a name related to whichever project you're working on.
