@@ -188,20 +188,30 @@ if (cpf:check-transition($cpf:document-uri, $cpf:transition)) then
       $ns := $cpf:options/s:classification-settings/s:response-namespace/fn:string(),
       $cs-elem := $cpf:options/s:classification-settings/s:response-element/fn:string(),
       $cs-wrap := $cpf:options/s:classification-settings/s:response-wrapper/fn:string(),
-      $w-qname := fn:QName($ns, $cs-wrap),
+      $wrapper-qname := fn:QName($ns, $cs-wrap),
       $m-qname := fn:QName($ns, $cs-elem),
 
-      $_ := xdmp:log($w-qname, "info"),
+      $_ := xdmp:log($wrapper-qname, "info"),
       $_ := xdmp:log($m-qname, "info"),
 
       $cs-meta :=fn:map(
       function($x){
+        let $rulebase-name := $x/@name,
+          $namespace := (
+            $cpf:options/s:classification-settings/s:rulebases
+              /s:rulebase[./fn:string() = $rulebase-name]/@namespace,
+            $ns
+          )[1],
+          $_ := xdmp:log("rbname>>> " || $rulebase-name, "info"),
+          $_ := xdmp:log($namespace, "info")
+
+        return
         element {$m-qname} {
           $x/@* !
           (
-          element {fn:QName($ns,fn:local-name(.))} { fn:data(.) }
+          element {fn:QName($namespace,fn:local-name(.))} { fn:data(.) }
           ),
-          element {fn:QName($ns, "nameValueScore")} { fn:string-join( ($x/@name, $x/@value, $x/@score), "^") },
+          element {fn:QName($namespace, "nameValueScore")} { fn:string-join( ($x/@name, $x/@value, $x/@score), "^") },
           $x/fn:data()
         }
       },
@@ -221,27 +231,27 @@ if (cpf:check-transition($cpf:document-uri, $cpf:transition)) then
     return
       (
       (:~
-       : Remove previous rulebases if they exists, otherwise proceed as normal
+       : Replace previous rulebases if they exists, otherwise add
        :)
-      if ( fn:exists($doc//element()[fn:node-name(.) = $w-qname]) ) then
-        (
-        xdmp:log("meta exists", "info"),
-
-        $doc//element()[fn:node-name(.) = $w-qname] !
-        xdmp:node-delete(.)
-        )
-      else
-        xdmp:log("meta doesn't exist", "info")
-      ,
-      (:~
-       : This is proceding as normal
-       :)
-      xdmp:node-insert-child($doc/child::element(),
-        element { $w-qname } {
-          attribute classification-dateTime { fn:current-dateTime() },
-          $cs-meta
-        }
-      ),
+      let
+        $existing-node := $doc/child::element()/element()
+          [fn:node-name(.) = $wrapper-qname],
+        $cs-element :=
+          element { $wrapper-qname } {
+            attribute classification-dateTime { fn:current-dateTime() },
+            $cs-meta
+          }
+      return
+        if ( fn:exists($existing-node) ) then
+          (
+          xdmp:log("meta exists", "info"),
+          xdmp:node-replace($existing-node, $cs-element)
+          )
+        else
+          (
+          xdmp:log("meta doesn't exist", "info"),
+          xdmp:node-insert-child($doc/child::element(), $cs-element)
+          ),
       cpf:success( $cpf:document-uri, $cpf:transition, ())
       )
   }
