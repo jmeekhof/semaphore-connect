@@ -1,0 +1,4 @@
+# Semaphore-connect releases
+
+## 1.0
+* Namespace support: wrapper element, response element are configurable globally and local by rule base names
