@@ -134,6 +134,27 @@ let $opt-map := map:new((
   ()
 ))
 
+let $name-in-rulebase :=
+  function (
+    $cs-element as element(META),
+    $rb-element as element(s:rulebase)+)
+    as xs:boolean
+  (:~
+   : This is the filter worker function to determine if the META element is in
+   : the list of Rulebases that we want to keep.
+   :
+   : Best use case is to partially apply the $rb-element, then use the
+   : resulting function in fn:filter.
+   :
+   : @author Josh Meekhof
+   : @param $cs-element the element from the classification server
+   : @param $rb-element the Rulebase element, from the $cpf:config
+   : @return boolean indicator of the existance of cs in rb
+   :)
+  {
+    fn:exists( $cs-element[./@name = $rb-element] )
+  }
+
 (:~
  : This puts it all together. This applies the map to the functions with the
  : accompanying document data
@@ -196,7 +217,8 @@ if (cpf:check-transition($cpf:document-uri, $cpf:transition)) then
 
       $cs-meta :=fn:map(
       function($x){
-        let $rulebase-name := $x/@name,
+        let
+          $rulebase-name := $x/@name,
           $namespace := (
             $cpf:options/s:classification-settings/s:rulebases
               /s:rulebase[./fn:string() = $rulebase-name]/@namespace,
@@ -211,22 +233,22 @@ if (cpf:check-transition($cpf:document-uri, $cpf:transition)) then
           (
           element {fn:QName($namespace,fn:local-name(.))} { fn:data(.) }
           ),
-          element {fn:QName($namespace, "nameValueScore")} { fn:string-join( ($x/@name, $x/@value, $x/@score), "^") },
+          element {fn:QName($namespace, "nameValueScore")} {
+            fn:string-join( ($x/@name, $x/@value, $x/@score), "^")
+          },
           $x/fn:data()
         }
       },
-        (:~
-         : Filter the meta nodes IF rulebases are specified. Otherwise, return
-         : them all
-         :)
-        if ( fn:exists($cpf:options/s:classification-settings/s:rulebases)) then
-          fn:filter(
-            function($z) {
-              fn:exists($z[@name = $cpf:options/s:classification-settings/s:rulebases/s:rulebase])
-            },
-            $m-part/response/STRUCTUREDDOCUMENT/META)
-        else
-          $m-part/response/STRUCTUREDDOCUMENT/META
+      (:~
+       : Filter the meta nodes IF rulebases are specified. Otherwise, return
+       : them all
+       :)
+      if ( fn:exists($cpf:options/s:classification-settings/s:rulebases)) then
+        fn:filter(
+          $name-in-rulebase(?,$cpf:options/s:classification-settings/s:rulebases/s:rulebase),
+          $m-part/response/STRUCTUREDDOCUMENT/META)
+      else
+        $m-part/response/STRUCTUREDDOCUMENT/META
       )
     return
       (
