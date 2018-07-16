@@ -62,7 +62,9 @@ You'll also need to add something like:
 `build.gradle`
 ```groovy
 ext {
+  mlAppConfig{
     customTokens.put("%%SCS_MODULES_DATABASE%%", mlSlcModulesDatabase)
+  }
 }
 ```
 - Configure _this_ project's content database to be the _triggers_ database for the parent project's content database.
